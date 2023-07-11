@@ -1,7 +1,6 @@
 import type { App } from "vue";
 import PrimeVue from "primevue/config";
-import ToastService from "primevue/toastservice";
-import { RouterLink } from "vue-router";
+import router from "@layouts/router";
 
 import Accordion from "primevue/accordion";
 import AccordionTab from "primevue/accordiontab";
@@ -91,6 +90,7 @@ import Textarea from "primevue/textarea";
 import TieredMenu from "primevue/tieredmenu";
 import Timeline from "primevue/timeline";
 import Toast from "primevue/toast";
+import ToastService from "primevue/toastservice";
 import ToggleButton from "primevue/togglebutton";
 import Toolbar from "primevue/toolbar";
 import Tooltip from "primevue/tooltip";
@@ -102,7 +102,6 @@ import VirtualScroller from "primevue/virtualscroller";
 
 const components = {
   PrimeVue,
-  RouterLink,
   Accordion,
   AccordionTab,
   AutoComplete,
@@ -198,6 +197,7 @@ const components = {
 
 export default (app: App) => {
   app.use(PrimeVue, { inputStyle: "filled", ripple: true });
+  app.use(router);
   app.use(ToastService);
   app.directive("badge", BadgeDirective);
   app.directive("focustrap", FocusTrap);
