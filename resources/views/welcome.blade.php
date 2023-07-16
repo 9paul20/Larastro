@@ -21,7 +21,9 @@
 
 <body>
     <h1>Larastro</h1>
-    <div id="null" />
+    <div id="app">
+        <index />
+    </div>
 </body>
 
 </html>
