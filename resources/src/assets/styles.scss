@@ -1,0 +1,21 @@
+/* You can add global styles to this file, and also import other style files */
+
+$gutter: 1rem; //for primeflex grid system
+@import '/resources/src/assets/styles/layout.scss';
+
+/* PrimeVue */
+// @import 'primevue/resources/primevue.min.css';
+@import 'primeflex/primeflex.scss';
+@import 'primeicons/primeicons.css';
+@import 'primevue/resources/themes/bootstrap4-light-blue/theme.css';
+
+@font-face {
+  font-family: "Oswald";
+  src: url(/resources/src/assets/font/Oswald-VariableFont_wght.ttf);
+  font-weight: normal;
+  font-style: normal;
+}
+
+body{
+    font-family: "Oswald", Calibri, Tahoma, sans-serif;
+}

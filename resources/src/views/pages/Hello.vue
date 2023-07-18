@@ -1,7 +1,7 @@
 <template>
-    <div>
-        <h1>Hello from VueJS Composition API</h1>
-    </div>
+  <div>
+    <h1>Page Hello</h1>
+  </div>
 </template>
 
 <script setup></script>

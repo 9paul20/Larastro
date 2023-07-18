@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
+import autoprefixer from 'autoprefixer';
 import laravel from 'laravel-vite-plugin';
+import postcssNesting from 'postcss-nesting';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.scss', 'resources/js/app.js'],
             refresh: true,
         }),
         vue({
@@ -21,8 +23,16 @@ export default defineConfig({
         alias: {
             '@js': '/resources/js',
             '@css': '/resources/css',
-            '@srcPages': '/resources/src/pages',
+            '@src': '/resources/src',
             '@views': '/resources/views',
+        },
+    },
+    css: {
+        postcss: {
+            plugins: [
+                autoprefixer({}),
+                postcssNesting
+            ],
         },
     },
 });
