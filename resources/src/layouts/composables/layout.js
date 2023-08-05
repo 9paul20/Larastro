@@ -1,5 +1,5 @@
 import { toRefs, reactive, computed } from 'vue';
-
+//
 const layoutConfig = reactive({
     ripple: false,
     darkTheme: false,
@@ -9,16 +9,17 @@ const layoutConfig = reactive({
     scale: 14,
     activeMenuItem: null
 });
-
+//
 const layoutState = reactive({
     staticMenuDesktopInactive: true,
     overlayMenuActive: false,
     staticMenuMobileActive: false,
     profileSidebarVisible: false,
     configSidebarVisible: false,
-    menuHoverActive: false
+    menuHoverActive: false,
+    showButtonHover: true,
 });
-
+//
 export function useLayout() {
     const changeThemeSettings = (theme, darkTheme) => {
         layoutConfig.darkTheme = darkTheme;

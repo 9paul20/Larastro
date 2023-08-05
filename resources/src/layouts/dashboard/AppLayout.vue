@@ -1,12 +1,19 @@
 <template>
-  <div class="layout-wrapper" :class="containerClass">
+  <div
+    class="card flex justify-content-center layout-wrapper"
+    :class="containerClass"
+  >
     <AppTopbar />
     <div class="layout-sidebar">
       <AppMenu />
     </div>
     <div class="layout-main-container">
       <div class="layout-main">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <transition name="scale" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
       <AppFooter />
     </div>
@@ -16,10 +23,11 @@
 
 <script setup>
 import { computed, watch, ref } from 'vue';
-import AppTopbar from '@src/layouts/AppTopbar.vue';
+import AppTopbar from '@src/layouts/dashboard/AppTopbar.vue';
 import AppMenu from '@src/layouts/AppMenu.vue';
-import AppFooter from '@src/layouts/AppFooter.vue';
+import AppFooter from '@src/layouts/dashboard/AppFooter.vue';
 import { useLayout } from '@src/layouts/composables/layout.js';
+//
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
 const outsideClickListener = ref(null);
 const containerClass = computed(() => {
@@ -76,4 +84,15 @@ watch(isSidebarActive, newVal => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.18s ease;
+}
+
+.scale-enter-from,
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+</style>

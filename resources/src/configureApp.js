@@ -1,8 +1,7 @@
 import PrimeVue from 'primevue/config';
 import App from '@src/views/App.vue';
-// import App from '@src/layouts/AppLayout.vue';
 import router from '@src/layouts/router';
-
+//
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import AutoComplete from 'primevue/autocomplete';
@@ -100,12 +99,12 @@ import TreeSelect from 'primevue/treeselect';
 import TreeTable from 'primevue/treetable';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import VirtualScroller from 'primevue/virtualscroller';
-
+//
 const components = {
   PrimeVue,
+  App,
   Accordion,
   AccordionTab,
-  App,
   AutoComplete,
   Avatar,
   AvatarGroup,
@@ -208,5 +207,5 @@ const uses = [
   { name: router, parameter: null },
   { name: ToastService, parameter: null },
 ];
-
+//
 export default { components, directives, uses };

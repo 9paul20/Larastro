@@ -1,9 +1,13 @@
 <template>
   <div>
-    <div class="card flex justify-content-center">
+    <div>
       <!-- <Toast />
       <Button label="Show" @click="show()" /> -->
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition name="scale" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </div>
     <!-- <rippleComponent /> -->
   </div>
@@ -30,4 +34,15 @@ defineExpose({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.18s ease;
+}
+
+.scale-enter-from,
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+</style>

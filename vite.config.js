@@ -23,7 +23,9 @@ export default defineConfig({
         alias: {
             '@js': '/resources/js',
             '@css': '/resources/css',
+            '@images': '/resources/images',
             '@src': '/resources/src',
+            '@svg': '/resources/svg',
             '@views': '/resources/views',
         },
     },

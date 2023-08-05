@@ -3,6 +3,7 @@
     <button
       class="p-link layout-menu-button layout-topbar-button"
       @click="onMenuToggle()"
+      v-if="layoutState.showButtonHover.value"
     >
       <i class="pi pi-bars"></i>
     </button>
@@ -29,10 +30,7 @@
         <i class="pi pi-cog"></i>
         <span>Settings</span>
       </button>
-      <button
-        class="p-link layout-topbar-menu-button layout-topbar-button"
-        @click="console.log('ASD')"
-      >
+      <button class="p-link layout-topbar-menu-button layout-topbar-button">
         <i class="pi pi-ellipsis-v"></i>
       </button>
     </div>
@@ -42,22 +40,22 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@src/layouts/composables/layout.js';
-// import { useRouter } from "vue-router";
-
-const { onMenuToggle } = useLayout();
-
+// import { useRouter } from 'vue-router';
+//
+const { onMenuToggle, layoutState } = useLayout();
+//
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
 // const router = useRouter();
-
+//
 onMounted(() => {
   bindOutsideClickListener();
 });
-
+//
 onBeforeUnmount(() => {
   unbindOutsideClickListener();
 });
-
+//
 const onTopBarMenuButton = () => {
   topbarMenuActive.value = !topbarMenuActive.value;
 };
@@ -70,7 +68,7 @@ const topbarMenuClasses = computed(() => {
     'layout-topbar-menu-mobile-active': topbarMenuActive.value,
   };
 });
-
+//
 const bindOutsideClickListener = () => {
   if (!outsideClickListener.value) {
     outsideClickListener.value = event => {
@@ -100,6 +98,8 @@ const isOutsideClicked = event => {
     topbarEl.contains(event.target)
   );
 };
+//
+// console.log(layoutState.showButtonHover.value);
 </script>
 
 <style lang="scss" scoped></style>

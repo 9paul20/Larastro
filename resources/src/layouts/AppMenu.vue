@@ -15,9 +15,13 @@ import AppMenuItem from '@src/layouts/AppMenuItem.vue';
 const model = ref([
   {
     label: 'Home',
+    items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/' }],
+  },
+  {
+    label: 'Dashboard',
     items: [
-      { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-      { label: 'Hello', icon: 'pi pi-fw pi-home', to: '/hello' },
+      { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/dashboard' },
+      { label: 'Hello', icon: 'pi pi-fw pi-home', to: '/dashboard/hello' },
     ],
   },
   // {
