@@ -29,9 +29,20 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
+
+            $routeAttributesAuth = [
+                'name' => 'api',
+                'namespace' => 'App\Http\Controllers',
+                'prefix' => 'api',
+            ];
+
+            Route::middleware('api')->group(function () use ($routeAttributesAuth) {
+                Route::group($routeAttributesAuth, function () {
+
+                    //Users
+                    include(base_path('routes/users.php'));
+                });
+            });
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

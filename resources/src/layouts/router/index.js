@@ -47,6 +47,11 @@ const router = createRouter({
                     name: 'Hello',
                     component: () => import('@src/views/pages/dashboard/Hello.vue')
                 },
+                {
+                    path: '/dashboard/users',
+                    name: 'Users',
+                    component: () => import('@src/views/pages/dashboard/Users.vue')
+                },
             ]
         },
         {
@@ -57,7 +62,7 @@ const router = createRouter({
         {
             path: '/register',
             name: 'Register',
-            component: () => import('@src/views/pages/auth/Login.vue')
+            component: () => import('@src/views/pages/auth/Register.vue')
         },
         {
             path: '/:catchAll(.*)',

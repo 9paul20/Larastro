@@ -22,10 +22,13 @@
         <i class="pi pi-calendar"></i>
         <span>Calendar</span>
       </button>
-      <button class="p-link layout-topbar-button" @click="onTopBarMenuButton()">
-        <i class="pi pi-user"></i>
-        <span>Profile</span>
-      </button>
+      <div class="flex flex-wrap">
+        <button class="p-link layout-topbar-button" @click="toggle">
+          <i class="pi pi-user"></i>
+          <span>Profile</span>
+        </button>
+        <Menu ref="menu" :model="items" :popup="true" />
+      </div>
       <button class="p-link layout-topbar-button">
         <i class="pi pi-cog"></i>
         <span>Settings</span>
@@ -97,6 +100,18 @@ const isOutsideClicked = event => {
     topbarEl.isSameNode(event.target) ||
     topbarEl.contains(event.target)
   );
+};
+const menu = ref();
+const items = ref([
+  { label: 'Profile', icon: 'pi pi-fw pi-user' },
+  { label: 'Settings', icon: 'pi pi-fw pi-cog' },
+  { separator: true },
+  { label: 'Log Out', icon: 'pi pi-sign-out', to: '/' },
+]);
+
+const toggle = event => {
+  onTopBarMenuButton();
+  menu.value.toggle(event);
 };
 //
 // console.log(layoutState.showButtonHover.value);

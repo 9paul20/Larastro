@@ -1,6 +1,6 @@
 <template>
   <div
-    class="card flex justify-content-center layout-wrapper"
+    class="layout-wrapper layout-static p-ripple-disabled"
     :class="containerClass"
   >
     <AppTopbar />
@@ -87,7 +87,7 @@ watch(isSidebarActive, newVal => {
 <style lang="scss" scoped>
 .scale-enter-active,
 .scale-leave-active {
-  transition: all 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .scale-enter-from,

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-primary-50 flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden"
+    class="bg-primary-50 flex align-items-center justify-content-center min-h-screen min-w-screen"
   >
     <div class="flex flex-column align-items-center justify-content-center">
       <!-- <img :src="logoUrl" alt="Sakai logo" class="mb-5 w-6rem flex-shrink-0" /> -->
@@ -27,7 +27,7 @@
               class="mb-3"
             /> -->
             <div class="text-900 text-3xl font-medium mb-3">Welcome!</div>
-            <span class="text-600 font-medium">Login to continue</span>
+            <span class="text-600 font-medium">Register to continue</span>
           </div>
 
           <div>
@@ -53,7 +53,25 @@
               v-model="password"
               placeholder="Password"
               :toggleMask="true"
-              class="w-full mb-3"
+              class="w-full mb-5"
+              inputClass="w-full p-3"
+              promptLabel="Password Stronger"
+              weakLabel="Too simple"
+              mediumLabel="Average complexity"
+              strongLabel="Complex password"
+            />
+
+            <label
+              for="repeatPassword1"
+              class="block text-900 font-medium text-xl mb-2"
+              >Repeat Password</label
+            >
+            <Password
+              id="repeatPassword1"
+              v-model="repeatPassword"
+              placeholder="Repeat Password"
+              :toggleMask="true"
+              class="w-full mb-5"
               inputClass="w-full p-3"
               :feedback="false"
             />
@@ -68,16 +86,19 @@
                   binary
                   class="mr-2"
                 ></Checkbox>
-                <label for="rememberme1">Remember me</label>
+                <label for="rememberme1"
+                  >I Accept the
+                  <span
+                    class="font-semibold text-primary cursor-pointer"
+                    @click.prevent=""
+                    >terms and conditions</span
+                  >
+                  of Larastro.</label
+                >
               </div>
-              <a
-                class="font-medium no-underline ml-2 text-right cursor-pointer"
-                style="color: var(--primary-color)"
-                >Forgot password?</a
-              >
             </div>
             <router-link to="/dashboard">
-              <Button label="Sign In" class="w-full p-3 text-xl" />
+              <Button label="Register" class="w-full p-3 text-xl" />
             </router-link>
           </div>
         </div>
@@ -93,6 +114,7 @@ import { ref, computed } from 'vue';
 // const { layoutConfig } = useLayout();
 const email = ref('');
 const password = ref('');
+const repeatPassword = ref('');
 const checked = ref(false);
 // const logoUrl = computed(() => {
 //     return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;

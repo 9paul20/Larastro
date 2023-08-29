@@ -203,7 +203,17 @@ const directives = [
   { name: "styleclass", directive: StyleClass },
 ];
 const uses = [
-  { name: PrimeVue, parameter: { inputStyle: "filled", ripple: true } },
+  // { name: PrimeVue, parameter: { inputStyle: "filled", ripple: true } },
+  {
+    name: PrimeVue, parameter: {
+      inputStyle: "filled", ripple: true,
+      locale: {
+        accept: 'Aceptar',
+        reject: 'Rechazar',
+        //...
+      }
+    }
+  },
   { name: router, parameter: null },
   { name: ToastService, parameter: null },
 ];

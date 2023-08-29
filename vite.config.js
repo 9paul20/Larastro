@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import autoprefixer from 'autoprefixer';
 import laravel from 'laravel-vite-plugin';
@@ -21,20 +22,13 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@js': '/resources/js',
-            '@css': '/resources/css',
-            '@images': '/resources/images',
-            '@src': '/resources/src',
-            '@svg': '/resources/svg',
-            '@views': '/resources/views',
+            '@': fileURLToPath(new URL('./resources', import.meta.url)),
+            '@js': fileURLToPath(new URL('./resources/js', import.meta.url)),
+            '@css': fileURLToPath(new URL('./resources/css', import.meta.url)),
+            '@images': fileURLToPath(new URL('./resources/images', import.meta.url)),
+            '@src': fileURLToPath(new URL('./resources/src', import.meta.url)),
+            '@svg': fileURLToPath(new URL('./resources/svg', import.meta.url)),
+            '@views': fileURLToPath(new URL('./resources/views', import.meta.url))
         },
-    },
-    css: {
-        postcss: {
-            plugins: [
-                autoprefixer({}),
-                postcssNesting
-            ],
-        },
-    },
+    }
 });
