@@ -14,7 +14,7 @@
     <meta name="theme-color" content="#FFFFFF" />
     {{-- <link rel="shortcut icon" href="{{ url('/images/John_Deere_Logo.png') }}" /> --}}
     <title inertia>@yield('meta-title', config('app.name'))</title>
-    @vite(['resources/css/app.scss', 'resources/js/app.js'])
+    @vite(['resources/css/app.scss', 'resources/js/app.ts'])
 </head>
 
 <body>

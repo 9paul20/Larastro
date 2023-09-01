@@ -14,7 +14,6 @@
                     dataKey="id"
                     :rowHover="true"
                     v-model:filters="filters"
-                    v-model:selection="selectedUsers"
                     filterDisplay="row"
                     :loading="loading"
                     responsiveLayout="scroll"
@@ -23,10 +22,6 @@
                     <template #loading>
                         Loading users data. Please wait.
                     </template>
-                    <Column
-                        selectionMode="multiple"
-                        headerStyle="width: 3rem"
-                    ></Column>
                     <Column
                         field="id"
                         header="ID"
@@ -97,7 +92,6 @@ import { getAllUsers } from "@js/stores/Users";
 import { onBeforeMount, ref } from "vue";
 //
 const users = ref<Datum[]>([]);
-const selectedUsers = ref<any>();
 const filters = ref({
     global: {
         value: null,
@@ -132,8 +126,6 @@ onBeforeMount(() => {
 </script>
 
 <style scoped lang="scss">
-@import "@src/assets/badges.scss";
-
 ::v-deep(.p-datatable-frozen-tbody) {
     font-weight: bold;
 }
