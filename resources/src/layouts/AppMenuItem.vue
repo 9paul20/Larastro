@@ -1,11 +1,6 @@
 <template>
-  <li
-    :class="{ 'layout-root-menuitem': root, 'active-menuitem': isActiveMenu }"
-  >
-    <div
-      v-if="root && item.visible !== false"
-      class="layout-menuitem-root-text"
-    >
+  <li :class="{ 'layout-root-menuitem': root, 'active-menuitem': isActiveMenu }">
+    <div v-if="root && item.visible !== false" class="layout-menuitem-root-text">
       {{ item.label }}
     </div>
     <a
@@ -18,10 +13,7 @@
     >
       <i :class="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text">{{ item.label }}</span>
-      <i
-        class="pi pi-fw pi-angle-down layout-submenu-toggler"
-        v-if="item.items"
-      ></i>
+      <i class="pi pi-fw pi-angle-down layout-submenu-toggler" v-if="item.items"></i>
     </a>
     <router-link
       v-if="item.to && !item.items && item.visible !== false"
@@ -32,15 +24,9 @@
     >
       <i :class="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text">{{ item.label }}</span>
-      <i
-        class="pi pi-fw pi-angle-down layout-submenu-toggler"
-        v-if="item.items"
-      ></i>
+      <i class="pi pi-fw pi-angle-down layout-submenu-toggler" v-if="item.items"></i>
     </router-link>
-    <Transition
-      v-if="item.items && item.visible !== false"
-      name="layout-submenu"
-    >
+    <Transition v-if="item.items && item.visible !== false" name="layout-submenu">
       <ul v-show="root ? true : isActiveMenu" class="layout-submenu">
         <app-menu-item
           v-for="(child, i) in item.items"
@@ -56,14 +42,13 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useLayout } from '@src/layouts/composables/layout.js';
+import { ref, onBeforeMount, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useLayout } from "@src/layouts/composables/layout";
 
 const route = useRoute();
 
-const { layoutConfig, layoutState, setActiveMenuItem, onMenuToggle } =
-  useLayout();
+const { layoutConfig, layoutState, setActiveMenuItem, onMenuToggle } = useLayout();
 
 const props = defineProps({
   item: {
@@ -89,23 +74,23 @@ const itemKey = ref(null);
 
 onBeforeMount(() => {
   itemKey.value = props.parentItemKey
-    ? props.parentItemKey + '-' + props.index
+    ? props.parentItemKey + "-" + props.index
     : String(props.index);
 
   const activeItem = layoutState.activeMenuItem;
 
   isActiveMenu.value =
     activeItem === itemKey.value || activeItem
-      ? activeItem.startsWith(itemKey.value + '-')
+      ? activeItem.startsWith(itemKey.value + "-")
       : false;
 });
 
 watch(
   () => layoutConfig.activeMenuItem.value,
-  newVal => {
+  (newVal) => {
     isActiveMenu.value =
-      newVal === itemKey.value || newVal.startsWith(itemKey.value + '-');
-  },
+      newVal === itemKey.value || newVal.startsWith(itemKey.value + "-");
+  }
 );
 const itemClick = (event, item) => {
   if (item.disabled) {
@@ -135,7 +120,7 @@ const itemClick = (event, item) => {
   setActiveMenuItem(foundItemKey);
 };
 
-const checkActiveRoute = item => {
+const checkActiveRoute = (item) => {
   return route.path === item.to;
 };
 </script>

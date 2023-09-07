@@ -15,10 +15,7 @@
           );
         "
       >
-        <div
-          class="w-full surface-card py-8 px-5 sm:px-8"
-          style="border-radius: 53px"
-        >
+        <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
           <div class="text-center mb-5">
             <!-- <img
               src="/demo/images/login/avatar.png"
@@ -43,9 +40,7 @@
               v-model="email"
             />
 
-            <label
-              for="password1"
-              class="block text-900 font-medium text-xl mb-2"
+            <label for="password1" class="block text-900 font-medium text-xl mb-2"
               >Password</label
             >
             <Password
@@ -58,9 +53,7 @@
               :feedback="false"
             />
 
-            <div
-              class="flex align-items-center justify-content-between mb-5 gap-5"
-            >
+            <div class="flex align-items-center justify-content-between mb-5 gap-5">
               <div class="flex align-items-center">
                 <Checkbox
                   v-model="checked"
@@ -87,12 +80,12 @@
 </template>
 
 <script setup>
-// import { useLayout } from '@src/layouts/composables/layout.js';
-import { ref, computed } from 'vue';
+// import { useLayout } from '@src/layouts/composables/layout';
+import { ref, computed } from "vue";
 
 // const { layoutConfig } = useLayout();
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 const checked = ref(false);
 // const logoUrl = computed(() => {
 //     return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;

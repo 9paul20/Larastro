@@ -7,8 +7,8 @@
 </template>
 
 <script setup>
-import { useLayout } from '@src/layouts/composables/layout.js';
-import { computed } from 'vue';
+import { useLayout } from "@src/layouts/composables/layout";
+import { computed } from "vue";
 
 const { layoutConfig } = useLayout();
 

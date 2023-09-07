@@ -41,8 +41,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useLayout } from '@src/layouts/composables/layout.js';
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useLayout } from "@src/layouts/composables/layout";
 // import { useRouter } from 'vue-router';
 //
 const { onMenuToggle, layoutState } = useLayout();
@@ -68,31 +68,31 @@ const onTopBarMenuButton = () => {
 // };
 const topbarMenuClasses = computed(() => {
   return {
-    'layout-topbar-menu-mobile-active': topbarMenuActive.value,
+    "layout-topbar-menu-mobile-active": topbarMenuActive.value,
   };
 });
 //
 const bindOutsideClickListener = () => {
   if (!outsideClickListener.value) {
-    outsideClickListener.value = event => {
+    outsideClickListener.value = (event) => {
       if (isOutsideClicked(event)) {
         topbarMenuActive.value = false;
       }
     };
-    document.addEventListener('click', outsideClickListener.value);
+    document.addEventListener("click", outsideClickListener.value);
   }
 };
 const unbindOutsideClickListener = () => {
   if (outsideClickListener.value) {
-    document.removeEventListener('click', outsideClickListener);
+    document.removeEventListener("click", outsideClickListener);
     outsideClickListener.value = null;
   }
 };
-const isOutsideClicked = event => {
+const isOutsideClicked = (event) => {
   if (!topbarMenuActive.value) return;
 
-  const sidebarEl = document.querySelector('.layout-topbar-menu');
-  const topbarEl = document.querySelector('.layout-topbar-menu-button');
+  const sidebarEl = document.querySelector(".layout-topbar-menu");
+  const topbarEl = document.querySelector(".layout-topbar-menu-button");
 
   return !(
     sidebarEl.isSameNode(event.target) ||
@@ -103,13 +103,13 @@ const isOutsideClicked = event => {
 };
 const menu = ref();
 const items = ref([
-  { label: 'Profile', icon: 'pi pi-fw pi-user' },
-  { label: 'Settings', icon: 'pi pi-fw pi-cog' },
+  { label: "Profile", icon: "pi pi-fw pi-user" },
+  { label: "Settings", icon: "pi pi-fw pi-cog" },
   { separator: true },
-  { label: 'Log Out', icon: 'pi pi-sign-out', to: '/' },
+  { label: "Log Out", icon: "pi pi-sign-out", to: "/" },
 ]);
 
-const toggle = event => {
+const toggle = (event) => {
   onTopBarMenuButton();
   menu.value.toggle(event);
 };
