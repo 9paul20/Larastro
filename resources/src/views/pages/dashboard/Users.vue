@@ -40,14 +40,6 @@
               />
             </template>
             <template #end>
-              <!-- <FileUpload
-              mode="basic"
-              accept="image/*"
-              :maxFileSize="1000000"
-              label="Import"
-              chooseLabel="Import"
-              class="mr-2 inline-block"
-            /> -->
               <Button
                 label="Export"
                 icon="pi pi-upload"
@@ -143,12 +135,6 @@
       :modal="true"
       class="p-fluid"
     >
-      <!-- <img
-        v-if="user.image"
-        :src="`https://primefaces.org/cdn/primevue/images/product/${user.image}`"
-        :alt="user.image"
-        class="block m-auto pb-3"
-      /> -->
       <InputNumber
         id="id"
         v-model.trim="user.id"
@@ -182,101 +168,6 @@
         />
         <small class="p-error" v-if="submitted && !user.email">Email is required.</small>
       </div>
-      <!-- <div class="field">
-        <label for="description">Description</label>
-        <Textarea
-          id="description"
-          v-model="user.description"
-          required="true"
-          rows="3"
-          cols="20"
-        />
-      </div> -->
-
-      <!-- <div class="field">
-        <label for="inventoryStatus" class="mb-3">Inventory Status</label>
-        <Dropdown
-          id="inventoryStatus"
-          v-model="product.inventoryStatus"
-          :options="statuses"
-          optionLabel="label"
-          placeholder="Select a Status"
-        >
-          <template #value="slotProps">
-            <div v-if="slotProps.value && slotProps.value.value">
-              <Tag
-                :value="slotProps.value.value"
-                :severity="getStatusLabel(slotProps.value.label)"
-              />
-            </div>
-            <div v-else-if="slotProps.value && !slotProps.value.value">
-              <Tag :value="slotProps.value" :severity="getStatusLabel(slotProps.value)" />
-            </div>
-            <span v-else>
-              {{ slotProps.placeholder }}
-            </span>
-          </template>
-        </Dropdown>
-      </div> -->
-
-      <!-- <div class="field">
-        <label class="mb-3">Category</label>
-        <div class="formgrid grid">
-          <div class="field-radiobutton col-6">
-            <RadioButton
-              id="category1"
-              name="category"
-              value="Accessories"
-              v-model="user.category"
-            />
-            <label for="category1">Accessories</label>
-          </div>
-          <div class="field-radiobutton col-6">
-            <RadioButton
-              id="category2"
-              name="category"
-              value="Clothing"
-              v-model="user.category"
-            />
-            <label for="category2">Clothing</label>
-          </div>
-          <div class="field-radiobutton col-6">
-            <RadioButton
-              id="category3"
-              name="category"
-              value="Electronics"
-              v-model="user.category"
-            />
-            <label for="category3">Electronics</label>
-          </div>
-          <div class="field-radiobutton col-6">
-            <RadioButton
-              id="category4"
-              name="category"
-              value="Fitness"
-              v-model="user.category"
-            />
-            <label for="category4">Fitness</label>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- <div class="formgrid grid">
-        <div class="field col">
-          <label for="price">Price</label>
-          <InputNumber
-            id="price"
-            v-model="user.price"
-            mode="currency"
-            currency="USD"
-            locale="en-US"
-          />
-        </div>
-        <div class="field col">
-          <label for="quantity">Quantity</label>
-          <InputNumber id="quantity" v-model="user.quantity" integeronly />
-        </div>
-      </div> -->
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
         <Button label="Save" icon="pi pi-check" text @click="saveUser" />
@@ -338,9 +229,9 @@ const loading = ref<boolean>(true);
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
 const deleteUsersDialog = ref<boolean>(false);
-const lastID = ref<number>();
+const lastID = ref<number | undefined>();
 const user = ref<Datum>();
-const selectedUsers = ref<[]>();
+const selectedUsers = ref<[]>([]);
 const submitted = ref<boolean>(false);
 const filters = ref<{}>({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -370,9 +261,6 @@ const saveUser = () => {
   if (user.value?.name.trim()) {
     // Update User
     if (user.value.id) {
-      // user.value.inventoryStatus = user.value.inventoryStatus.value
-      //   ? user.value.inventoryStatus.value
-      //   : user.value.inventoryStatus;
       users.value[findIndexById(user.value.id)] = user.value;
       toast.add({
         severity: "success",
@@ -383,14 +271,10 @@ const saveUser = () => {
     }
     // Add User
     else {
-      lastID.value += 1;
-      user.value.id = lastID.value;
-      // user.value.id = createId();
-      // user.value.code = createId();
-      // user.value.image = "product-placeholder.svg";
-      // user.value.inventoryStatus = user.value.inventoryStatus
-      //   ? user.value.inventoryStatus.value
-      //   : "INSTOCK";
+      if (lastID.value !== undefined) {
+        lastID.value += 1;
+        user.value.id = lastID.value;
+      }
       users.value.push(user.value);
       toast.add({
         severity: "success",
@@ -443,14 +327,6 @@ const findIndexById = (id: number) => {
   }
 
   return index;
-};
-const createId = () => {
-  let id = "";
-  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < 5; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return id;
 };
 const confirmDeleteSelected = () => {
   deleteUsersDialog.value = true;
