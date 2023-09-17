@@ -2,8 +2,8 @@ $gutter: 1rem; //for primeflex grid system
 @import '@src/assets/layout/layout.scss';
 
 /* PrimeVue */
-@import '@node_modules/primevue/resources/themes/bootstrap4-light-blue/theme.css';
-// @import '@node_modules/primevue/resources/themes/lara-light-indigo/theme.css';
+// @import '@node_modules/primevue/resources/themes/bootstrap4-light-blue/theme.css';
+@import '@node_modules/primevue/resources/themes/lara-light-indigo/theme.css';
 @import '@node_modules/primeicons/primeicons.css';
 @import '@node_modules/primeflex/primeflex.scss';
 @import '@node_modules/primeflex/themes/primeone-light.scss';

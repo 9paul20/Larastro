@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import million from 'million/compiler';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
@@ -9,6 +10,7 @@ export default defineConfig({
             input: ['resources/css/app.scss', 'resources/js/app.ts'],
             refresh: true,
         }),
+        million.vite({ auto: true }),
         vue({
             template: {
                 transformAssetUrls: {

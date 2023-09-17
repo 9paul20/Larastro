@@ -31,22 +31,18 @@
               <i class="pi pi-fw pi-exclamation-circle text-2xl text-white"></i>
             </div>
             <h1 class="text-900 font-bold text-5xl mb-2">Error Occured</h1>
-            <span class="text-600 mb-5"
-              >Requested resource is not available.</span
-            >
-            <img
-              src="@svg/asset-error.svg"
-              alt="Error"
-              class="mb-5"
-              width="80%"
-            />
+            <span class="text-600 mb-5">Requested resource is not available.</span>
+            <img src="@svg/asset-error.svg" alt="Error" class="mb-5" width="80%" />
             <div class="col-12 mt-5 text-center">
               <i
                 class="pi pi-fw pi-arrow-left text-blue-500 mr-2"
                 style="vertical-align: center"
               ></i>
-              <router-link to="/" class="text-blue-500"
-                >Go to Dashboard</router-link
+              <router-link v-if="isInDashboard" to="/dashboard" class="text-blue-500"
+                >Go to Dashboard.</router-link
+              >
+              <router-link v-else to="/" class="text-blue-500"
+                >Go to Home Page.</router-link
               >
             </div>
           </div>
@@ -56,6 +52,15 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
+
+const $route = useRoute();
+
+const isInDashboard = computed(() => {
+  return $route.path.startsWith("/dashboard");
+});
+</script>
 
 <style lang="scss" scoped></style>
