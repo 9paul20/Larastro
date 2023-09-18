@@ -155,6 +155,9 @@
           :class="{ 'p-invalid': submitted && !user.name }"
         />
         <small class="p-error" v-if="submitted && !user.name">Name is required.</small>
+        <!-- <small class="p-error" v-if="resp?.response.data.errors.name">{{
+          resp?.response.data.errors.name
+        }}</small> -->
       </div>
       <div class="field">
         <label for="email">Email</label>
@@ -167,6 +170,34 @@
           :class="{ 'p-invalid': submitted && !user.email }"
         />
         <small class="p-error" v-if="submitted && !user.email">Email is required.</small>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <InputText
+          id="password"
+          v-model.trim="user.password"
+          required="true"
+          type="password"
+          placeholder="Write a password"
+          :class="{ 'p-invalid': submitted && !user.password }"
+        />
+        <small class="p-error" v-if="submitted && !user.password"
+          >Password is required.</small
+        >
+      </div>
+      <div class="field">
+        <label for="password_confirmation">Repeat Password</label>
+        <InputText
+          id="password_confirmation"
+          v-model.trim="user.password_confirmation"
+          required="true"
+          type="password"
+          placeholder="Repeat a password"
+          :class="{ 'p-invalid': submitted && !user.password_confirmation }"
+        />
+        <small class="p-error" v-if="submitted && !user.password_confirmation"
+          >Password is required.</small
+        >
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
@@ -217,11 +248,12 @@
 
 <script setup lang="ts">
 import { Datum } from "@js/interfaces/User";
-import { getAllUsers } from "@js/stores/Users";
+import { usersStore } from "@js/stores/Users";
 import { onBeforeMount, ref } from "vue";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 //
+const store = usersStore();
 const toast = useToast();
 const dt = ref<any>();
 const users = ref<Datum[]>([]);
@@ -269,27 +301,52 @@ const saveUser = () => {
         life: 3000,
       });
     }
-    // Add User
+    // Create User
     else {
-      if (lastID.value !== undefined) {
-        lastID.value += 1;
-        user.value.id = lastID.value;
-      }
-      users.value.push(user.value);
-      toast.add({
-        severity: "success",
-        summary: "Successful",
-        detail: "User Created",
-        life: 3000,
-      });
+      console.log(user.value);
+      store
+        .storeUser(user.value)
+        .then((resp: any) => {
+          if (resp && resp.status === "success") {
+            if (lastID.value !== undefined) {
+              lastID.value += 1;
+              user.value.id = lastID.value;
+            }
+            user.value = {
+              id: 0,
+              name: "",
+              email: "",
+              password: "",
+              password_confirmation: "",
+            };
+            userDialog.value = false;
+            users.value.push(user.value);
+            toast.add({
+              severity: "success",
+              summary: "Successful",
+              detail: resp.message,
+              life: 3000,
+            });
+          } else {
+            console.log(resp.response.data);
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: "User Can't Created",
+              life: 3000,
+            });
+          }
+        })
+        .catch((error: string) => {
+          toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Error of server: " + error,
+            life: 3000,
+          });
+          console.log(error);
+        });
     }
-
-    userDialog.value = false;
-    user.value = {
-      id: 0,
-      name: "",
-      email: "",
-    };
   }
 };
 const editUser = (prod: Datum) => {
@@ -344,7 +401,8 @@ const deleteSelectedUsers = () => {
 };
 //
 onBeforeMount(() => {
-  getAllUsers()
+  store
+    .getAllUsers()
     .then((resp: any) => {
       users.value = resp.data;
       lastID.value = users.value[users.value.length - 1].id;

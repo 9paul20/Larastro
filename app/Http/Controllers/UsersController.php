@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -25,49 +26,25 @@ class UsersController extends Controller
             ],
             'users_page'
         );
-        // $columnNames = [
-        //     'Id',
-        //     'Name',
-        //     'State',
-        //     'Role',
-        //     'Team',
-        //     ''
-        // ];
         if (request()->wantsJson())
             return $rowDatas;
         return "The access is just for JSON request";
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        $validatedData = $request->validated();
+        $user = User::create($validatedData);
+        if (request()->wantsJson()) {
+            return response()->json([
+                "status" => "success",
+                'message' => 'User ' . $user->name . ' was created perfectly.'
+            ]);
+        }
+        return "The access is just for JSON request";
     }
 
     /**
