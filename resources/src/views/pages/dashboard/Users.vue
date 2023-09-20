@@ -155,9 +155,11 @@
           :class="{ 'p-invalid': submitted && !user.name }"
         />
         <small class="p-error" v-if="submitted && !user.name">Name is required.</small>
-        <!-- <small class="p-error" v-if="resp?.response.data.errors.name">{{
-          resp?.response.data.errors.name
-        }}</small> -->
+        <div v-if="errors?.name">
+          <div v-for="(errorName, indexName) in errors.name" :key="indexName">
+            <small class="p-error">{{ errorName }}</small>
+          </div>
+        </div>
       </div>
       <div class="field">
         <label for="email">Email</label>
@@ -170,6 +172,11 @@
           :class="{ 'p-invalid': submitted && !user.email }"
         />
         <small class="p-error" v-if="submitted && !user.email">Email is required.</small>
+        <div v-if="errors?.email">
+          <div v-for="(errorEmail, indexEmail) in errors.email" :key="indexEmail">
+            <small class="p-error">{{ errorEmail }}</small>
+          </div>
+        </div>
       </div>
       <div class="field">
         <label for="password">Password</label>
@@ -184,6 +191,14 @@
         <small class="p-error" v-if="submitted && !user.password"
           >Password is required.</small
         >
+        <div v-if="errors?.password">
+          <div
+            v-for="(errorPassword, indexPassword) in errors.password"
+            :key="indexPassword"
+          >
+            <small class="p-error">{{ errorPassword }}</small>
+          </div>
+        </div>
       </div>
       <div class="field">
         <label for="password_confirmation">Repeat Password</label>
@@ -198,6 +213,16 @@
         <small class="p-error" v-if="submitted && !user.password_confirmation"
           >Password is required.</small
         >
+        <div v-if="errors?.password_confirmation">
+          <div
+            v-for="(
+              errorPasswordConfirmation, indexPasswordConfirmation
+            ) in errors.password_confirmation"
+            :key="indexPasswordConfirmation"
+          >
+            <small class="p-error">{{ errorPasswordConfirmation }}</small>
+          </div>
+        </div>
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
@@ -263,6 +288,7 @@ const deleteUserDialog = ref<boolean>(false);
 const deleteUsersDialog = ref<boolean>(false);
 const lastID = ref<number | undefined>();
 const user = ref<Datum>();
+const errors = ref(null);
 const selectedUsers = ref<[]>([]);
 const submitted = ref<boolean>(false);
 const filters = ref<{}>({
@@ -328,13 +354,16 @@ const saveUser = () => {
               life: 3000,
             });
           } else {
-            console.log(resp.response.data);
             toast.add({
               severity: "error",
               summary: "Error",
               detail: "User Can't Created",
               life: 3000,
             });
+            // console.log(resp.response.data);
+            if (resp.response.data.errors) {
+              errors.value = resp.response.data.errors;
+            }
           }
         })
         .catch((error: string) => {
@@ -344,7 +373,7 @@ const saveUser = () => {
             detail: "Error of server: " + error,
             life: 3000,
           });
-          console.log(error);
+          // console.log(error);
         });
     }
   }
