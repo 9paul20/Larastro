@@ -141,7 +141,6 @@
         required="true"
         type="number"
         class="hidden"
-        :class="{ 'p-invalid': submitted && !user.name }"
       />
       <div class="field">
         <label for="name">Name</label>
@@ -152,7 +151,10 @@
           autofocus
           type="text"
           placeholder="Write a name"
-          :class="{ 'p-invalid': submitted && !user.name }"
+          :class="{
+            'p-invalid': (submitted && !user.name) || errors?.name,
+          }"
+          @blur="hideErrors('name')"
         />
         <small class="p-error" v-if="submitted && !user.name">Name is required.</small>
         <div v-if="errors?.name">
@@ -169,7 +171,8 @@
           required="true"
           type="email"
           placeholder="Write a email"
-          :class="{ 'p-invalid': submitted && !user.email }"
+          :class="{ 'p-invalid': (submitted && !user.email) || errors?.email }"
+          @blur="hideErrors('email')"
         />
         <small class="p-error" v-if="submitted && !user.email">Email is required.</small>
         <div v-if="errors?.email">
@@ -186,7 +189,8 @@
           required="true"
           type="password"
           placeholder="Write a password"
-          :class="{ 'p-invalid': submitted && !user.password }"
+          :class="{ 'p-invalid': (submitted && !user.password) || errors?.password }"
+          @blur="hideErrors('password')"
         />
         <small class="p-error" v-if="submitted && !user.password"
           >Password is required.</small
@@ -208,7 +212,11 @@
           required="true"
           type="password"
           placeholder="Repeat a password"
-          :class="{ 'p-invalid': submitted && !user.password_confirmation }"
+          :class="{
+            'p-invalid':
+              (submitted && !user.password_confirmation) || errors?.password_confirmation,
+          }"
+          @blur="hideErrors('password_confirmation')"
         />
         <small class="p-error" v-if="submitted && !user.password_confirmation"
           >Password is required.</small
@@ -297,7 +305,7 @@ const filters = ref<{}>({
   name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   email: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
 });
-const exportCSV = () => {
+const exportCSV = (event: any) => {
   dt.value.exportCSV();
 };
 const openNew = () => {
@@ -312,6 +320,12 @@ const openNew = () => {
 const hideDialog = () => {
   userDialog.value = false;
   submitted.value = false;
+  errors.value = null;
+};
+const hideErrors = (field: string) => {
+  if (errors.value && field in errors.value) {
+    errors.value[field] = null as never;
+  }
 };
 const saveUser = () => {
   submitted.value = true;
@@ -334,10 +348,11 @@ const saveUser = () => {
         .storeUser(user.value)
         .then((resp: any) => {
           if (resp && resp.status === "success") {
-            if (lastID.value !== undefined) {
+            if (lastID.value !== undefined && user.value) {
               lastID.value += 1;
               user.value.id = lastID.value;
             }
+            users.value.push(user.value as Datum);
             user.value = {
               id: 0,
               name: "",
@@ -346,7 +361,6 @@ const saveUser = () => {
               password_confirmation: "",
             };
             userDialog.value = false;
-            users.value.push(user.value);
             toast.add({
               severity: "success",
               summary: "Successful",
@@ -418,7 +432,7 @@ const confirmDeleteSelected = () => {
   deleteUsersDialog.value = true;
 };
 const deleteSelectedUsers = () => {
-  users.value = users.value.filter((val) => !selectedUsers.value.includes(val));
+  users.value = users.value.filter((val) => !selectedUsers.value.includes(val as never));
   deleteUsersDialog.value = false;
   selectedUsers.value = [];
   toast.add({
