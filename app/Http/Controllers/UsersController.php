@@ -15,7 +15,6 @@ class UsersController extends Controller
     {
         // $this->authorize('view', User::class);
 
-        $search = $request->all();
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
         $rowDatas = User::paginate(
             $perPage,
@@ -27,7 +26,7 @@ class UsersController extends Controller
             'users_page'
         );
         if (request()->wantsJson())
-            return $rowDatas;
+            return response()->json($rowDatas, 200);
         return "The access is just for JSON request";
     }
 
@@ -38,21 +37,49 @@ class UsersController extends Controller
     {
         $validatedData = $request->validated();
         $user = User::create($validatedData);
-        if (request()->wantsJson()) {
+        if (!User::create($validatedData))
+            return response()->json([
+                "status" => "error",
+                'message' => 'User ' . $user->name . ' was not created.'
+            ], 422);
+        elseif (request()->wantsJson()) {
             return response()->json([
                 "status" => "success",
                 'message' => 'User ' . $user->name . ' was created perfectly.'
-            ]);
+            ], 200);
         }
         return "The access is just for JSON request";
+        // $validatedData = $request->validated();
+        // $user = User::create($validatedData);
+        // if (request()->wantsJson()) {
+        //     return response()->json([
+        //         "status" => "success",
+        //         'message' => 'User ' . $user->name . ' was created perfectly.'
+        //     ]);
+        // }
+        // return "The access is just for JSON request";
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    // public function update(UserRequest $request, string $id)
+    public function update(UserRequest $request, string $id)
     {
-        //
+        $validatedData = $request->validated();
+        $user = User::findOrFail($id);
+        if (!$user->updateOrFail($validatedData)) {
+            return response()->json([
+                "status" => "error",
+                'message' => 'User ' . $user->name . ' was not updated.'
+            ], 422);
+        } elseif (request()->wantsJson()) {
+            return response()->json([
+                "status" => "info",
+                'message' => 'User ' . $user->name . ' was updated perfectly.'
+            ], 200);
+        }
+        return "The access is just for JSON request";
     }
 
     /**

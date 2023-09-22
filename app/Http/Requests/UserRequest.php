@@ -25,8 +25,8 @@ class UserRequest extends FormRequest
         return [
             'name' => 'required|string|min:4|max:255|unique:users,name,' . $id . ',id',
             'email' => 'required|email|unique:users,email,' . $id . ',id',
-            'password' => 'required|string|min:4|max:255|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
-            'password_confirmation' => 'required|string|min:4|max:255|same:password',
+            'password' => 'string|min:4|max:255|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
+            'password_confirmation' => 'string|min:4|max:255|same:password',
         ];
     }
 }

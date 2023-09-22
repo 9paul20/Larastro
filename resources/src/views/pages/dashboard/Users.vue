@@ -152,11 +152,11 @@
           type="text"
           placeholder="Write a name"
           :class="{
-            'p-invalid': (submitted && !user.name) || errors?.name,
+            'p-invalid': (submitted && !user?.name) || errors?.name,
           }"
           @blur="hideErrors('name')"
         />
-        <small class="p-error" v-if="submitted && !user.name">Name is required.</small>
+        <small class="p-error" v-if="submitted && !user?.name">Name is required.</small>
         <div v-if="errors?.name">
           <div v-for="(errorName, indexName) in errors.name" :key="indexName">
             <small class="p-error">{{ errorName }}</small>
@@ -174,7 +174,7 @@
           :class="{ 'p-invalid': (submitted && !user.email) || errors?.email }"
           @blur="hideErrors('email')"
         />
-        <small class="p-error" v-if="submitted && !user.email">Email is required.</small>
+        <small class="p-error" v-if="submitted && !user?.email">Email is required.</small>
         <div v-if="errors?.email">
           <div v-for="(errorEmail, indexEmail) in errors.email" :key="indexEmail">
             <small class="p-error">{{ errorEmail }}</small>
@@ -186,13 +186,16 @@
         <InputText
           id="password"
           v-model.trim="user.password"
-          required="true"
+          :required="passwordRequired"
           type="password"
           placeholder="Write a password"
-          :class="{ 'p-invalid': (submitted && !user.password) || errors?.password }"
+          :class="{
+            'p-invalid':
+              (submitted && !user.password && passwordRequired) || errors?.password,
+          }"
           @blur="hideErrors('password')"
         />
-        <small class="p-error" v-if="submitted && !user.password"
+        <small class="p-error" v-if="submitted && !user?.password && passwordRequired"
           >Password is required.</small
         >
         <div v-if="errors?.password">
@@ -209,16 +212,19 @@
         <InputText
           id="password_confirmation"
           v-model.trim="user.password_confirmation"
-          required="true"
+          :required="passwordRequired"
           type="password"
           placeholder="Repeat a password"
           :class="{
             'p-invalid':
-              (submitted && !user.password_confirmation) || errors?.password_confirmation,
+              (submitted && !user?.password_confirmation && passwordRequired) ||
+              errors?.password_confirmation,
           }"
           @blur="hideErrors('password_confirmation')"
         />
-        <small class="p-error" v-if="submitted && !user.password_confirmation"
+        <small
+          class="p-error"
+          v-if="submitted && !user?.password_confirmation && passwordRequired"
           >Password is required.</small
         >
         <div v-if="errors?.password_confirmation">
@@ -296,6 +302,7 @@ const deleteUserDialog = ref<boolean>(false);
 const deleteUsersDialog = ref<boolean>(false);
 const lastID = ref<number | undefined>();
 const user = ref<Datum>();
+const passwordRequired = ref<boolean>();
 const errors = ref(null);
 const selectedUsers = ref<[]>([]);
 const submitted = ref<boolean>(false);
@@ -329,21 +336,47 @@ const hideErrors = (field: string) => {
 };
 const saveUser = () => {
   submitted.value = true;
+  passwordRequired.value = user.value?.id === 0 ? true : false;
 
   if (user.value?.name.trim()) {
     // Update User
-    if (user.value.id) {
-      users.value[findIndexById(user.value.id)] = user.value;
-      toast.add({
-        severity: "success",
-        summary: "Successful",
-        detail: "User Updated",
-        life: 3000,
-      });
+    if (!passwordRequired) {
+      store
+        .updateUser(user.value)
+        .then((resp: any) => {
+          if (resp && resp.status === "info") {
+            users.value[findIndexById(user.value.id)] = user.value;
+            userDialog.value = false;
+            toast.add({
+              severity: resp.status,
+              summary: "Successful",
+              detail: resp.message,
+              life: 3000,
+            });
+          } else if (resp.status === "error") {
+            toast.add({
+              severity: resp.status,
+              summary: "Error",
+              detail: resp.message,
+              life: 3000,
+            });
+            if (resp.response.data.errors) {
+              errors.value = resp.response.data.errors;
+            }
+          }
+        })
+        .catch((error: string) => {
+          toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Error of server: " + error,
+            life: 3000,
+          });
+          console.error(error);
+        });
     }
     // Create User
     else {
-      console.log(user.value);
       store
         .storeUser(user.value)
         .then((resp: any) => {
@@ -362,23 +395,27 @@ const saveUser = () => {
             };
             userDialog.value = false;
             toast.add({
-              severity: "success",
+              severity: resp.status,
               summary: "Successful",
               detail: resp.message,
               life: 3000,
             });
-          } else {
+          } else if (resp.status === "error") {
+            // ESTAMOS REVISANDO COMO AGREGAR MAS MENSAJES AL RETURN CUANDO EXISTE ERROR DE VALIDACIONES EN USERSCONTROLLERS
+            // } else {
             toast.add({
-              severity: "error",
+              severity: resp.status,
+              // severity: "error",
               summary: "Error",
-              detail: "User Can't Created",
+              detail: resp.message,
+              // detail: "Error to add user",
               life: 3000,
             });
-            // console.log(resp.response.data);
             if (resp.response.data.errors) {
               errors.value = resp.response.data.errors;
             }
           }
+          console.log(resp);
         })
         .catch((error: string) => {
           toast.add({
@@ -387,7 +424,7 @@ const saveUser = () => {
             detail: "Error of server: " + error,
             life: 3000,
           });
-          // console.log(error);
+          console.error(error);
         });
     }
   }
