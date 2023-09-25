@@ -280,8 +280,6 @@
         <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedUsers" />
       </template>
     </Dialog>
-
-    <Toast />
   </div>
 </template>
 
@@ -295,13 +293,13 @@ import { useToast } from "primevue/usetoast";
 const store = usersStore();
 const toast = useToast();
 const dt = ref<any>();
+const user = ref<Datum>();
 const users = ref<Datum[]>([]);
 const loading = ref<boolean>(true);
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
 const deleteUsersDialog = ref<boolean>(false);
 const lastID = ref<number | undefined>();
-const user = ref<Datum>();
 const passwordRequired = ref<boolean>();
 const errors = ref(null);
 const selectedUsers = ref<[]>([]);
@@ -320,14 +318,24 @@ const openNew = () => {
     id: 0,
     name: "",
     email: "",
+    password: "",
+    password_confirmation: "",
   };
   submitted.value = false;
   userDialog.value = true;
+  errors.value = null;
 };
 const hideDialog = () => {
   userDialog.value = false;
   submitted.value = false;
   errors.value = null;
+  user.value = {
+    id: 0,
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+  };
 };
 const hideErrors = (field: string) => {
   if (errors.value && field in errors.value) {
@@ -338,84 +346,83 @@ const saveUser = () => {
   submitted.value = true;
   passwordRequired.value = user.value?.id === 0 ? true : false;
 
-  if (user.value?.name.trim()) {
+  if (user.value?.name.trim() && user.value?.email.trim()) {
+    // Create User
+    if (passwordRequired.value) {
+      if (user.value?.password.trim() && user.value?.password_confirmation.trim()) {
+        store
+          .storeUser(user.value)
+          .then((resp: any) => {
+            console.log(resp);
+            if (resp && resp.severity === "success") {
+              if (lastID.value !== undefined && user.value) {
+                lastID.value += 1;
+                user.value.id = lastID.value;
+              }
+              users.value.push(user.value as Datum);
+              user.value = {
+                id: 0,
+                name: "",
+                email: "",
+                password: "",
+                password_confirmation: "",
+              };
+              userDialog.value = false;
+              toast.add({
+                severity: resp.severity,
+                summary: resp.summary,
+                detail: resp.detail,
+                life: 3000,
+              });
+            } else if (resp.response.status === 422) {
+              toast.add({
+                severity: resp.response.data.severity,
+                summary: resp.response.data.summary,
+                detail: resp.response.data.detail + " " + resp.response.data.name,
+                life: 3000,
+              });
+              if (resp.response.data.errors) {
+                errors.value = resp.response.data.errors;
+              }
+            }
+          })
+          .catch((error: string) => {
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: "Error of server: " + error,
+              life: 3000,
+            });
+            console.error(error);
+          });
+      }
+    }
     // Update User
-    if (!passwordRequired) {
+    else {
       store
         .updateUser(user.value)
         .then((resp: any) => {
-          if (resp && resp.status === "info") {
+          console.log(resp);
+          if (resp && resp.severity === "info") {
             users.value[findIndexById(user.value.id)] = user.value;
             userDialog.value = false;
             toast.add({
-              severity: resp.status,
-              summary: "Successful",
-              detail: resp.message,
+              severity: resp.severity,
+              summary: resp.summary,
+              detail: resp.detail,
               life: 3000,
             });
-          } else if (resp.status === "error") {
+          } else if (resp.response.status === 422) {
             toast.add({
-              severity: resp.status,
-              summary: "Error",
-              detail: resp.message,
+              severity: resp.response.data.severity,
+              summary: resp.response.data.summary,
+              detail: resp.response.data.detail + " " + resp.response.data.name,
               life: 3000,
             });
             if (resp.response.data.errors) {
               errors.value = resp.response.data.errors;
             }
           }
-        })
-        .catch((error: string) => {
-          toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: "Error of server: " + error,
-            life: 3000,
-          });
-          console.error(error);
-        });
-    }
-    // Create User
-    else {
-      store
-        .storeUser(user.value)
-        .then((resp: any) => {
-          if (resp && resp.status === "success") {
-            if (lastID.value !== undefined && user.value) {
-              lastID.value += 1;
-              user.value.id = lastID.value;
-            }
-            users.value.push(user.value as Datum);
-            user.value = {
-              id: 0,
-              name: "",
-              email: "",
-              password: "",
-              password_confirmation: "",
-            };
-            userDialog.value = false;
-            toast.add({
-              severity: resp.status,
-              summary: "Successful",
-              detail: resp.message,
-              life: 3000,
-            });
-          } else if (resp.status === "error") {
-            // ESTAMOS REVISANDO COMO AGREGAR MAS MENSAJES AL RETURN CUANDO EXISTE ERROR DE VALIDACIONES EN USERSCONTROLLERS
-            // } else {
-            toast.add({
-              severity: resp.status,
-              // severity: "error",
-              summary: "Error",
-              detail: resp.message,
-              // detail: "Error to add user",
-              life: 3000,
-            });
-            if (resp.response.data.errors) {
-              errors.value = resp.response.data.errors;
-            }
-          }
-          console.log(resp);
         })
         .catch((error: string) => {
           toast.add({
@@ -432,27 +439,54 @@ const saveUser = () => {
 const editUser = (prod: Datum) => {
   user.value = { ...prod };
   userDialog.value = true;
+  submitted.value = false;
+  errors.value = null;
 };
 const confirmDeleteUser = (prod: Datum) => {
   user.value = prod;
   deleteUserDialog.value = true;
 };
 const deleteUser = () => {
-  if (user.value && user.value.id) {
-    users.value = users.value.filter((val) => val.id !== user.value?.id);
+  if (user.value) {
+    store
+      .destroyUser(user.value)
+      .then((resp: any) => {
+        console.log(resp);
+        if (resp.severity === "warn") {
+          users.value = users.value.filter((val) => val.id !== user.value?.id);
+          user.value = {
+            id: 0,
+            name: "",
+            email: "",
+            password: "",
+            password_confirmation: "",
+          };
+          deleteUserDialog.value = false;
+          toast.add({
+            severity: resp.severity,
+            summary: resp.summary,
+            detail: resp.detail,
+            life: 3000,
+          });
+        } else if (resp.response.status === 422) {
+          toast.add({
+            severity: resp.response.data.severity,
+            summary: resp.response.data.summary,
+            detail: resp.response.data.detail + ", " + resp.response.data.errors,
+            life: 3000,
+          });
+        }
+      })
+      .catch((error: string) => {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Error of server: " + error,
+          life: 3000,
+        });
+        console.error(error);
+      });
   }
-  deleteUserDialog.value = false;
-  user.value = {
-    id: 0,
-    name: "",
-    email: "",
-  };
-  toast.add({
-    severity: "success",
-    summary: "Successful",
-    detail: "User Deleted",
-    life: 3000,
-  });
 };
 const findIndexById = (id: number) => {
   let index = -1;
@@ -473,8 +507,8 @@ const deleteSelectedUsers = () => {
   deleteUsersDialog.value = false;
   selectedUsers.value = [];
   toast.add({
-    severity: "success",
-    summary: "Successful",
+    severity: "warn",
+    summary: "Warn Message",
     detail: "Users Deleted",
     life: 3000,
   });
@@ -485,11 +519,22 @@ onBeforeMount(() => {
     .getAllUsers()
     .then((resp: any) => {
       users.value = resp.data;
-      lastID.value = users.value[users.value.length - 1].id;
+      // lastID.value = users.value[users.value.length - 1].id;
       loading.value = false;
     })
     .catch((error: string) => {
-      console.log(error);
+      console.error(error);
+      loading.value = false;
+    });
+  //SE ESTA TRATANDO DE OBTENER EL ULTIMO ID DE LA TABLA USERS PARA PODER TRABAJAR CORRECTAMENTE CON EL CRUD, SOBRE TODO AL MOMENTO DE AGREGAR Y ELIMINAR UN USUARIO CONSTANTEMENTE
+  store
+    .getNextUserId()
+    .then((resp: any) => {
+      console.log(resp.data);
+      lastID.value = resp.data;
+    })
+    .catch((error: string) => {
+      console.error(error);
       loading.value = false;
     });
 });

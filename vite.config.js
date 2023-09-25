@@ -10,6 +10,17 @@ export default defineConfig({
             input: ['resources/css/app.scss', 'resources/js/app.ts'],
             refresh: true,
         }),
+        {
+            name: 'php',
+            handleHotUpdate({ file, server }) {
+                if (file.endsWith('.php')) {
+                    server.ws.send({
+                        type: 'full-reload',
+                        path: '*',
+                    });
+                }
+            },
+        },
         million.vite({ auto: true }),
         vue({
             template: {

@@ -1,14 +1,17 @@
 import axios from "axios";
 import { defineStore } from "pinia";
-// import { ref } from "vue";
 import type { User } from "../interfaces";
 import { Datum } from "@js/interfaces/User";
 
 export const usersStore = defineStore('usersStore', () => {
     //
     const getAllUsers = async (): Promise<User> => {
-        const resp = await axios.get<User>(`http://localhost:8000/api/users`);
-        return resp.data;
+        try {
+            const resp = await axios.get<User>(`http://localhost:8000/api/users`);
+            return resp.data;
+        } catch (error) {
+            return error as any;
+        }
     };
     //
     const storeUser = async (user: Datum): Promise<Datum> => {
@@ -29,9 +32,29 @@ export const usersStore = defineStore('usersStore', () => {
         }
     };
     //
+    const destroyUser = async (user: Datum): Promise<Datum> => {
+        try {
+            const resp = await axios.delete<Datum>(`http://localhost:8000/api/users/${user.id}`);
+            return resp.data;
+        } catch (error) {
+            return error as any;
+        }
+    };
+    //
+    const getNextUserId = async (): Promise<any> => {
+        try {
+            const resp = await axios.get<any>(`http://localhost:8000/api/users/getNextUserId`);
+            return resp.data;
+        } catch (error) {
+            return error as any;
+        }
+    };
+    //
     return {
         getAllUsers,
         storeUser,
         updateUser,
+        destroyUser,
+        getNextUserId
     };
 });

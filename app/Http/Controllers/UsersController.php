@@ -13,21 +13,29 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
-        // $this->authorize('view', User::class);
-
+        // $this->authorize("view", User::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
         $rowDatas = User::paginate(
             $perPage,
             [
-                'id',
-                'name',
-                'email',
+                "id",
+                "name",
+                "email",
             ],
-            'users_page'
+            "users_page"
         );
         if (request()->wantsJson())
-            return response()->json($rowDatas, 200);
-        return "The access is just for JSON request";
+            try {
+                return response()->json($rowDatas, 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "Error in get All Users",
+                    "errors" => $th->getMessage()
+                ], 422);
+            }
+        return "The access for get all users is just for JSON request";
     }
 
     /**
@@ -35,51 +43,50 @@ class UsersController extends Controller
      */
     public function store(UserRequest $request)
     {
-        $validatedData = $request->validated();
-        $user = User::create($validatedData);
-        if (!User::create($validatedData))
-            return response()->json([
-                "status" => "error",
-                'message' => 'User ' . $user->name . ' was not created.'
-            ], 422);
-        elseif (request()->wantsJson()) {
-            return response()->json([
-                "status" => "success",
-                'message' => 'User ' . $user->name . ' was created perfectly.'
-            ], 200);
+        if (request()->wantsJson()) {
+            try {
+                $user = User::create($request->all());
+                return response()->json([
+                    "severity" => "success",
+                    "summary" => "Successful",
+                    "detail" => "User " . $user->name . " was created perfectly."
+                ]);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "Error in create User",
+                    "errors" => $th->getMessage()
+                ], 422);
+            }
         }
-        return "The access is just for JSON request";
-        // $validatedData = $request->validated();
-        // $user = User::create($validatedData);
-        // if (request()->wantsJson()) {
-        //     return response()->json([
-        //         "status" => "success",
-        //         'message' => 'User ' . $user->name . ' was created perfectly.'
-        //     ]);
-        // }
-        // return "The access is just for JSON request";
+        return "The access for store user is just for JSON request";
     }
 
     /**
      * Update the specified resource in storage.
      */
-    // public function update(UserRequest $request, string $id)
     public function update(UserRequest $request, string $id)
     {
-        $validatedData = $request->validated();
-        $user = User::findOrFail($id);
-        if (!$user->updateOrFail($validatedData)) {
-            return response()->json([
-                "status" => "error",
-                'message' => 'User ' . $user->name . ' was not updated.'
-            ], 422);
-        } elseif (request()->wantsJson()) {
-            return response()->json([
-                "status" => "info",
-                'message' => 'User ' . $user->name . ' was updated perfectly.'
-            ], 200);
+        if (request()->wantsJson()) {
+            try {
+                $user = User::findOrFail($id);
+                $user->updateOrFail($request->all());
+                return response()->json([
+                    "severity" => "info",
+                    "summary" => "Successful",
+                    "detail" => "User " . $user->name . " was updated perfectly."
+                ], 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "Error in update User",
+                    "errors" => $th->getMessage()
+                ], 422);
+            }
         }
-        return "The access is just for JSON request";
+        return "The access for update user is just for JSON request";
     }
 
     /**
@@ -87,6 +94,61 @@ class UsersController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (request()->wantsJson()) {
+            try {
+                $user = User::findOrFail($id);
+                if (auth()->check()) { //Por el momento este if se usa por que aun no manejo los roles e inicios de sesión
+                    if (auth()->user()->id === $id)
+                        return response()->json([
+                            "severity" => "error",
+                            "summary" => "Error",
+                            "detail" => $user->name . ", You cannot delete yourself."
+                        ], 422);
+                    // if (auth()->user()->id === 1) //Ejemplo de como se puede proteger el rol de admin desde el controlador
+                    //     return response()->json([
+                    //         "severity" => "error",
+                    //         "summary" => "Error",
+                    //         "detail" => $user->name . ", You cannot delete the main admin."
+                    //     ], 422);
+                }
+                $user->deleteOrFail();
+                return response()->json([
+                    "severity" => "warn",
+                    "summary" => "Warning",
+                    "detail" => "User " . $user->name . " was deleted perfectly."
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "Error in delete User ",
+                    "errors" => $e->getMessage()
+                ], 422);
+            }
+        }
+        return "The access for destroy user is just for JSON request";
+    }
+
+    public function getNextUserId()
+    {
+        if (request()->wantsJson()) {
+            try {
+                $nextId = User::max('id') + 1;
+                return response()->json([
+                    "severity" => "success",
+                    "summary" => "Successful",
+                    "detail" => "Next user id was get perfectly.",
+                    "nextId" => $nextId
+                ], 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "Error in get next user id",
+                    "errors" => $th->getMessage()
+                ], 422);
+            }
+        }
+        return "The access for get next user id is just for JSON request";
     }
 }
