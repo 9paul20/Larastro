@@ -41,9 +41,9 @@ export const usersStore = defineStore('usersStore', () => {
         }
     };
     //
-    const getNextUserId = async (): Promise<any> => {
+    const getCurrentUserId = async (): Promise<object> => {
         try {
-            const resp = await axios.get<any>(`http://localhost:8000/api/users/getNextUserId`);
+            const resp = await axios.get<object>(`http://localhost:8000/api/users/getCurrentUserId`);
             return resp.data;
         } catch (error) {
             return error as any;
@@ -55,6 +55,6 @@ export const usersStore = defineStore('usersStore', () => {
         storeUser,
         updateUser,
         destroyUser,
-        getNextUserId
+        getCurrentUserId
     };
 });

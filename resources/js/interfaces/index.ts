@@ -1,1 +1,2 @@
-export { type User } from "./User";
+export { type User } from "./Users/User";
+export { type UserLastID } from './Users/UserLastID';

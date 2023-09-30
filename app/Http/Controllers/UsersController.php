@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UsersController extends Controller
 {
@@ -129,11 +130,39 @@ class UsersController extends Controller
         return "The access for destroy user is just for JSON request";
     }
 
-    public function getNextUserId()
+    public function destroyMany(Request $request)
+    {
+        $userIds = $request->input('user_ids');
+
+        if (!$userIds) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No se proporcionaron IDs de usuarios para eliminar.'
+            ], 400);
+        }
+
+        try {
+            // Elimina los usuarios con los IDs proporcionados
+            User::whereIn('id', $userIds)->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Usuarios eliminados exitosamente.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al eliminar usuarios.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getCurrentUserId()
     {
         if (request()->wantsJson()) {
             try {
-                $nextId = User::max('id') + 1;
+                $nextId = DB::table('users')->max('id');
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",

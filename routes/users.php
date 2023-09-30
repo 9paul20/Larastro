@@ -10,4 +10,4 @@ Route::resource('/users', App\Http\Controllers\UsersController::class)->names([
     'destroy' => 'users.destroy',
 ])->except(['show']);
 
-Route::get('/users/getNextUserId', [App\Http\Controllers\UsersController::class, 'getNextUserId'])->name('users.getNextUserId');
+Route::get('/users/getCurrentUserId', [App\Http\Controllers\UsersController::class, 'getCurrentUserId'])->name('users.getActualUserId');

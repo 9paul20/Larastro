@@ -284,11 +284,12 @@
 </template>
 
 <script setup lang="ts">
-import { Datum } from "@js/interfaces/User";
 import { usersStore } from "@js/stores/Users";
 import { onBeforeMount, ref } from "vue";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
+import { Datum } from "@js/interfaces/Users/User";
+import { UserLastID } from "@js/interfaces/index";
 //
 const store = usersStore();
 const toast = useToast();
@@ -299,7 +300,7 @@ const loading = ref<boolean>(true);
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
 const deleteUsersDialog = ref<boolean>(false);
-const lastID = ref<number | undefined>();
+const lastID = ref<UserLastID>();
 const passwordRequired = ref<boolean>();
 const errors = ref(null);
 const selectedUsers = ref<[]>([]);
@@ -353,27 +354,40 @@ const saveUser = () => {
         store
           .storeUser(user.value)
           .then((resp: any) => {
-            console.log(resp);
+            //console.log(resp);
             if (resp && resp.severity === "success") {
-              if (lastID.value !== undefined && user.value) {
-                lastID.value += 1;
-                user.value.id = lastID.value;
-              }
-              users.value.push(user.value as Datum);
-              user.value = {
-                id: 0,
-                name: "",
-                email: "",
-                password: "",
-                password_confirmation: "",
-              };
-              userDialog.value = false;
-              toast.add({
-                severity: resp.severity,
-                summary: resp.summary,
-                detail: resp.detail,
-                life: 3000,
-              });
+              store
+                .getCurrentUserId()
+                .then((resp: any) => {
+                  lastID.value = resp;
+                  user.value.id = lastID.value?.nextId;
+                  //console.log("ID: ", lastID.value?.nextId, "User: ", user.value);
+                  users.value.push(user.value as Datum);
+                  user.value = {
+                    id: 0,
+                    name: "",
+                    email: "",
+                    password: "",
+                    password_confirmation: "",
+                  };
+                  userDialog.value = false;
+                  toast.add({
+                    severity: resp.severity,
+                    summary: resp.summary,
+                    detail: resp.detail,
+                    life: 3000,
+                  });
+                })
+                .catch((error: string) => {
+                  console.error(error);
+                  loading.value = false;
+                  toast.add({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "Can't get last id of users: " + error,
+                    life: 3000,
+                  });
+                });
             } else if (resp.response.status === 422) {
               toast.add({
                 severity: resp.response.data.severity,
@@ -402,7 +416,7 @@ const saveUser = () => {
       store
         .updateUser(user.value)
         .then((resp: any) => {
-          console.log(resp);
+          //console.log(resp);
           if (resp && resp.severity === "info") {
             users.value[findIndexById(user.value.id)] = user.value;
             userDialog.value = false;
@@ -451,7 +465,7 @@ const deleteUser = () => {
     store
       .destroyUser(user.value)
       .then((resp: any) => {
-        console.log(resp);
+        //console.log(resp);
         if (resp.severity === "warn") {
           users.value = users.value.filter((val) => val.id !== user.value?.id);
           user.value = {
@@ -503,6 +517,9 @@ const confirmDeleteSelected = () => {
   deleteUsersDialog.value = true;
 };
 const deleteSelectedUsers = () => {
+  selectedUsers.value.forEach((selectedUser: Datum) => {
+    console.log(selectedUser.id);
+  });
   users.value = users.value.filter((val) => !selectedUsers.value.includes(val as never));
   deleteUsersDialog.value = false;
   selectedUsers.value = [];
@@ -515,27 +532,22 @@ const deleteSelectedUsers = () => {
 };
 //
 onBeforeMount(() => {
+  //Antes de que se monte el componente se obtienen todos los usuarios
   store
     .getAllUsers()
     .then((resp: any) => {
       users.value = resp.data;
-      // lastID.value = users.value[users.value.length - 1].id;
       loading.value = false;
     })
     .catch((error: string) => {
       console.error(error);
       loading.value = false;
-    });
-  //SE ESTA TRATANDO DE OBTENER EL ULTIMO ID DE LA TABLA USERS PARA PODER TRABAJAR CORRECTAMENTE CON EL CRUD, SOBRE TODO AL MOMENTO DE AGREGAR Y ELIMINAR UN USUARIO CONSTANTEMENTE
-  store
-    .getNextUserId()
-    .then((resp: any) => {
-      console.log(resp.data);
-      lastID.value = resp.data;
-    })
-    .catch((error: string) => {
-      console.error(error);
-      loading.value = false;
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get users list: " + error,
+        life: 3000,
+      });
     });
 });
 //
