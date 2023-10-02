@@ -6,6 +6,7 @@ use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UsersController extends Controller
 {
@@ -16,17 +17,17 @@ class UsersController extends Controller
     {
         // $this->authorize("view", User::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
-        $rowDatas = User::paginate(
-            $perPage,
-            [
-                "id",
-                "name",
-                "email",
-            ],
-            "users_page"
-        );
         if (request()->wantsJson())
             try {
+                $rowDatas = User::paginate(
+                    $perPage,
+                    [
+                        "id",
+                        "name",
+                        "email",
+                    ],
+                    "users_page"
+                );
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -132,33 +133,32 @@ class UsersController extends Controller
 
     public function destroyMany(Request $request)
     {
+        Log::info('This is some useful information.');
         if (request()->wantsJson()) {
-            return response()->json($request);
-            $userIds = $request->input('user_ids');
-            return $userIds;
-
-            if (!$userIds) {
+            $usersID = $request->all();
+            $usersCount = count($usersID);
+            if (!$usersID) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'No se proporcionaron IDs de usuarios para eliminar.'
+                    'severity' => 'error',
+                    'summary' => 'Error',
+                    'detail' => 'List of users is null o undefined.'
                 ], 400);
             }
-
-            // try {
-            //     // Elimina los usuarios con los IDs proporcionados
-            //     User::whereIn('id', $userIds)->delete();
-
-            //     return response()->json([
-            //         'status' => 'success',
-            //         'message' => 'Usuarios eliminados exitosamente.'
-            //     ], 200);
-            // } catch (\Throwable $th) {
-            //     return response()->json([
-            //         'status' => 'error',
-            //         'message' => 'Error al eliminar usuarios.',
-            //         'error' => $th->getMessage()
-            //     ], 422);
-            // }
+            try {
+                User::whereIn('id', $usersID)->delete();
+                return response()->json([
+                    "severity" => "warn",
+                    "summary" => "Warning",
+                    'detail' => $usersCount . ' Users Deleted.'
+                ], 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'severity' => 'error',
+                    'summary' => 'Error',
+                    'detail' => 'Error to Delete Users.',
+                    'errors' => $th->getMessage()
+                ], 422);
+            }
         }
         return "The access for destroy many users is just for JSON request";
     }

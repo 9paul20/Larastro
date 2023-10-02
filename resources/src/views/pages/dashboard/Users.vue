@@ -398,7 +398,7 @@ const saveUser = () => {
               toast.add({
                 severity: resp.response.data.severity,
                 summary: resp.response.data.summary,
-                detail: resp.response.data.detail + " " + resp.response.data.name,
+                detail: resp.response.data.detail + " " + resp.response.data.errors,
                 life: 3000,
               });
               if (resp.response.data.errors) {
@@ -436,7 +436,7 @@ const saveUser = () => {
             toast.add({
               severity: resp.response.data.severity,
               summary: resp.response.data.summary,
-              detail: resp.response.data.detail + " " + resp.response.data.name,
+              detail: resp.response.data.detail + " " + resp.response.data.errors,
               life: 3000,
             });
             if (resp.response.data.errors) {
@@ -523,13 +523,43 @@ const confirmDeleteSelected = () => {
   deleteUsersDialog.value = true;
 };
 const deleteSelectedUsers = () => {
-  // selectedUsers.value.forEach((selectedUser: Datum) => {
-  //   console.log("El ID No. :" + selectedUser.id);
-  // });
+  const usersID = ref<{ id: number }[]>([]);
+  selectedUsers.value.forEach((selectedUser: Datum) => {
+    usersID.value.push({ id: selectedUser.id });
+  });
   store
-    .destroyUsers(selectedUsers.value)
+    .destroyUsers(usersID.value)
     .then((resp: any) => {
-      console.log("La resp desde la clase vue es: " + resp);
+      // console.log(resp);
+      if (resp.severity === "warn") {
+        users.value = users.value.filter(
+          (val) => !selectedUsers.value.includes(val as never)
+        );
+        deleteUsersDialog.value = false;
+        selectedUsers.value = [];
+        toast.add({
+          severity: resp.severity,
+          summary: resp.summary,
+          detail: resp.detail,
+          life: 3000,
+        });
+      } else if (resp.severity === "warn") {
+        deleteUsersDialog.value = false;
+        selectedUsers.value = [];
+        toast.add({
+          severity: resp.severity,
+          summary: resp.summary,
+          detail: resp.detail,
+          life: 3000,
+        });
+      } else if (resp.response.status === 422) {
+        toast.add({
+          severity: resp.response.data.severity,
+          summary: resp.response.data.summary,
+          detail: resp.response.data.detail + " " + resp.response.data.errors,
+          life: 3000,
+        });
+      }
     })
     .catch((error: string) => {
       toast.add({
@@ -540,15 +570,6 @@ const deleteSelectedUsers = () => {
       });
       console.error(error);
     });
-  users.value = users.value.filter((val) => !selectedUsers.value.includes(val as never));
-  deleteUsersDialog.value = false;
-  selectedUsers.value = [];
-  toast.add({
-    severity: "warn",
-    summary: "Warn Message",
-    detail: "Users Deleted",
-    life: 3000,
-  });
 };
 //
 onBeforeMount(() => {

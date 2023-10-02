@@ -8,7 +8,7 @@ export const usersStore = defineStore('usersStore', () => {
     const getAllUsers = async (): Promise<User> => {
         try {
             const resp = await axios.get<User>(`http://localhost:8000/api/users`);
-            return resp.data;
+            return resp.data as User;
         } catch (error) {
             return error as any;
         }
@@ -17,7 +17,7 @@ export const usersStore = defineStore('usersStore', () => {
     const storeUser = async (user: Datum): Promise<Datum> => {
         try {
             const resp = await axios.post<Datum>('http://localhost:8000/api/users', user);
-            return resp.data;
+            return resp.data as Datum;
         } catch (error) {
             return error as any;
         }
@@ -26,7 +26,7 @@ export const usersStore = defineStore('usersStore', () => {
     const updateUser = async (user: Datum): Promise<Datum> => {
         try {
             const resp = await axios.put<Datum>(`http://localhost:8000/api/users/${user.id}`, user);
-            return resp.data;
+            return resp.data as Datum;
         } catch (error) {
             return error as any;
         }
@@ -35,19 +35,16 @@ export const usersStore = defineStore('usersStore', () => {
     const destroyUser = async (user: Datum): Promise<Datum> => {
         try {
             const resp = await axios.delete<Datum>(`http://localhost:8000/api/users/${user.id}`);
-            return resp.data;
+            return resp.data as Datum;
         } catch (error) {
             return error as any;
         }
     };
     //
-    // const destroyUsers = async (users: Array<object>): Promise<Array<object>> => {
-    const destroyUsers = async (users: any): Promise<any> => {
+    const destroyUsers = async (users: Array<object>): Promise<Array<object>> => {
         try {
-            // console.log("La lista de los usuarios desde el store es:", users);
-            const resp = await axios.get<any>('http://localhost:8000/api/users/destroyMany', users);
-            console.log("La resp de los usuarios desde el store es:", resp);
-            return resp.data;
+            const resp = await axios.post<any>('http://localhost:8000/api/users/destroyMany', users);
+            return resp.data as Array<object>;
         } catch (error) {
             return error as any;
         }
@@ -56,7 +53,7 @@ export const usersStore = defineStore('usersStore', () => {
     const getCurrentUserId = async (): Promise<object> => {
         try {
             const resp = await axios.get<object>(`http://localhost:8000/api/users/getCurrentUserId`);
-            return resp.data;
+            return resp.data as object;
         } catch (error) {
             return error as any;
         }
