@@ -9,5 +9,5 @@ Route::resource('/users', App\Http\Controllers\UsersController::class)->names([
     'update' => 'users.update',
     'destroy' => 'users.destroy',
 ])->except(['show']);
-
-Route::get('/users/getCurrentUserId', [App\Http\Controllers\UsersController::class, 'getCurrentUserId'])->name('users.getActualUserId');
+Route::get('/users/destroyMany', [App\Http\Controllers\UsersController::class, 'destroyMany'])->name('users.destroyMany');
+Route::get('/users/getCurrentUserId', [App\Http\Controllers\UsersController::class, 'getCurrentUserId'])->name('users.getCurrentUserId');

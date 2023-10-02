@@ -118,12 +118,12 @@ class UsersController extends Controller
                     "summary" => "Warning",
                     "detail" => "User " . $user->name . " was deleted perfectly."
                 ], 200);
-            } catch (\Exception $e) {
+            } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in delete User ",
-                    "errors" => $e->getMessage()
+                    "detail" => "Error in delete User",
+                    "errors" => $th->getMessage()
                 ], 422);
             }
         }
@@ -132,30 +132,35 @@ class UsersController extends Controller
 
     public function destroyMany(Request $request)
     {
-        $userIds = $request->input('user_ids');
+        if (request()->wantsJson()) {
+            return response()->json($request);
+            $userIds = $request->input('user_ids');
+            return $userIds;
 
-        if (!$userIds) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No se proporcionaron IDs de usuarios para eliminar.'
-            ], 400);
+            if (!$userIds) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No se proporcionaron IDs de usuarios para eliminar.'
+                ], 400);
+            }
+
+            // try {
+            //     // Elimina los usuarios con los IDs proporcionados
+            //     User::whereIn('id', $userIds)->delete();
+
+            //     return response()->json([
+            //         'status' => 'success',
+            //         'message' => 'Usuarios eliminados exitosamente.'
+            //     ], 200);
+            // } catch (\Throwable $th) {
+            //     return response()->json([
+            //         'status' => 'error',
+            //         'message' => 'Error al eliminar usuarios.',
+            //         'error' => $th->getMessage()
+            //     ], 422);
+            // }
         }
-
-        try {
-            // Elimina los usuarios con los IDs proporcionados
-            User::whereIn('id', $userIds)->delete();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Usuarios eliminados exitosamente.'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error al eliminar usuarios.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return "The access for destroy many users is just for JSON request";
     }
 
     public function getCurrentUserId()

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import type { User } from "../interfaces";
-import { Datum } from "@js/interfaces/User";
+import { Datum } from "@js/interfaces/Users/User";
 
 export const usersStore = defineStore('usersStore', () => {
     //
@@ -41,6 +41,18 @@ export const usersStore = defineStore('usersStore', () => {
         }
     };
     //
+    // const destroyUsers = async (users: Array<object>): Promise<Array<object>> => {
+    const destroyUsers = async (users: any): Promise<any> => {
+        try {
+            // console.log("La lista de los usuarios desde el store es:", users);
+            const resp = await axios.get<any>('http://localhost:8000/api/users/destroyMany', users);
+            console.log("La resp de los usuarios desde el store es:", resp);
+            return resp.data;
+        } catch (error) {
+            return error as any;
+        }
+    };
+    //
     const getCurrentUserId = async (): Promise<object> => {
         try {
             const resp = await axios.get<object>(`http://localhost:8000/api/users/getCurrentUserId`);
@@ -55,6 +67,7 @@ export const usersStore = defineStore('usersStore', () => {
         storeUser,
         updateUser,
         destroyUser,
+        destroyUsers,
         getCurrentUserId
     };
 });

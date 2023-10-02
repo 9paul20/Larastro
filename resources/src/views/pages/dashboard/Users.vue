@@ -273,11 +273,17 @@
     >
       <div class="confirmation-content">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span v-if="user">Are you sure you want to delete the selected users?</span>
+        <span v-if="users">Are you sure you want to delete the selected users?</span>
       </div>
       <template #footer>
         <Button label="No" icon="pi pi-times" text @click="deleteUsersDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedUsers" />
+        <Button
+          label="Yes"
+          icon="pi pi-check"
+          text
+          v-if="users"
+          @click="deleteSelectedUsers"
+        />
       </template>
     </Dialog>
   </div>
@@ -517,9 +523,23 @@ const confirmDeleteSelected = () => {
   deleteUsersDialog.value = true;
 };
 const deleteSelectedUsers = () => {
-  selectedUsers.value.forEach((selectedUser: Datum) => {
-    console.log(selectedUser.id);
-  });
+  // selectedUsers.value.forEach((selectedUser: Datum) => {
+  //   console.log("El ID No. :" + selectedUser.id);
+  // });
+  store
+    .destroyUsers(selectedUsers.value)
+    .then((resp: any) => {
+      console.log("La resp desde la clase vue es: " + resp);
+    })
+    .catch((error: string) => {
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Error of server: " + error,
+        life: 3000,
+      });
+      console.error(error);
+    });
   users.value = users.value.filter((val) => !selectedUsers.value.includes(val as never));
   deleteUsersDialog.value = false;
   selectedUsers.value = [];
