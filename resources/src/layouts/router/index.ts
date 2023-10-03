@@ -66,6 +66,12 @@ const router = createRouter({
                     component: () =>
                         import("@src/views/pages/dashboard/Users.vue"),
                 },
+                {
+                    path: "/dashboard/roles",
+                    name: "Roles",
+                    component: () =>
+                        import("@src/views/pages/dashboard/Roles.vue"),
+                },
             ],
         },
         {

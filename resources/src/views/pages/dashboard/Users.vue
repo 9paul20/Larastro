@@ -22,6 +22,12 @@
           :selectionOnly="true"
           showGridlines
         >
+          <template #paginatorstart>
+            <Button type="button" icon="pi pi-refresh" text @click="getAllUsers()" />
+          </template>
+          <template #paginatorend>
+            <!-- <Button type="button" icon="pi pi-download" text /> -->
+          </template>
           <Toolbar class="mb-4">
             <template #start>
               <Button
@@ -290,19 +296,19 @@
 </template>
 
 <script setup lang="ts">
-import { usersStore } from "@js/stores/Users";
 import { onBeforeMount, ref } from "vue";
-import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
+import { FilterMatchMode } from "primevue/api";
+import { usersStore } from "@js/stores/Users";
 import { Datum } from "@js/interfaces/Users/User";
 import { UserLastID } from "@js/interfaces/index";
 //
-const store = usersStore();
 const toast = useToast();
+const store = usersStore();
 const dt = ref<any>();
 const user = ref<Datum>();
 const users = ref<Datum[]>([]);
-const loading = ref<boolean>(true);
+const loading = ref<boolean>();
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
 const deleteUsersDialog = ref<boolean>(false);
@@ -348,6 +354,25 @@ const hideErrors = (field: string) => {
   if (errors.value && field in errors.value) {
     errors.value[field] = null as never;
   }
+};
+const getAllUsers = () => {
+  loading.value = true;
+  store
+    .getAllUsers()
+    .then((resp: any) => {
+      users.value = resp.data;
+      loading.value = false;
+    })
+    .catch((error: string) => {
+      console.error(error);
+      loading.value = false;
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get users list: " + error,
+        life: 3000,
+      });
+    });
 };
 const saveUser = () => {
   submitted.value = true;
@@ -574,22 +599,7 @@ const deleteSelectedUsers = () => {
 //
 onBeforeMount(() => {
   //Antes de que se monte el componente se obtienen todos los usuarios
-  store
-    .getAllUsers()
-    .then((resp: any) => {
-      users.value = resp.data;
-      loading.value = false;
-    })
-    .catch((error: string) => {
-      console.error(error);
-      loading.value = false;
-      toast.add({
-        severity: "error",
-        summary: "Error",
-        detail: "Can't get users list: " + error,
-        life: 3000,
-      });
-    });
+  getAllUsers();
 });
 //
 </script>

@@ -41,6 +41,9 @@ class RouteServiceProvider extends ServiceProvider
 
                     //Users
                     include(base_path('routes/users.php'));
+
+                    //Roles
+                    include(base_path('routes/roles.php'));
                 });
             });
 

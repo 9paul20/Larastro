@@ -2,37 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserRequest;
-use App\Models\User;
+use App\Http\Requests\RoleRequest;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
-class UsersController extends Controller
+class RolesController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // $this->authorize("view", User::class);
+        // $this->authorize("view", Role::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
         if (request()->wantsJson())
             try {
-                $rowDatas = User::paginate(
+                $rowDatas = Role::paginate(
                     $perPage,
                     [
                         "id",
                         "name",
-                        "email",
+                        "guard_name",
                     ],
-                    "users_page"
+                    "roles_page"
                 );
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in get All Users",
+                    "detail" => "Error in get All Roles",
                     "errors" => $th->getMessage()
                 ], 422);
             }
@@ -42,21 +42,21 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserRequest $request)
+    public function store(RoleRequest $request)
     {
         if (request()->wantsJson()) {
             try {
-                $user = User::create($request->all());
+                $role = Role::create($request->all());
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
-                    "detail" => "User " . $user->name . " was created perfectly."
+                    "detail" => "Role " . $role->name . " was created perfectly."
                 ]);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in create User",
+                    "detail" => "Error in create Role",
                     "errors" => $th->getMessage()
                 ], 422);
             }
@@ -67,22 +67,22 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserRequest $request, string $id)
+    public function update(RoleRequest $request, string $id)
     {
         if (request()->wantsJson()) {
             try {
-                $user = User::findOrFail($id);
-                $user->updateOrFail($request->all());
+                $role = Role::findOrFail($id);
+                $role->updateOrFail($request->all());
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",
-                    "detail" => "User " . $user->name . " was updated perfectly."
+                    "detail" => "Role " . $role->name . " was updated perfectly."
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in update User",
+                    "detail" => "Error in update Role",
                     "errors" => $th->getMessage()
                 ], 422);
             }
@@ -97,32 +97,26 @@ class UsersController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $user = User::findOrFail($id);
+                $role = Role::findOrFail($id);
                 if (auth()->check()) { //Por el momento este if se usa por que aun no manejo los roles e inicios de sesión
-                    if (auth()->user()->id === $id)
+                    if (auth()->user()->hasRole($role->name))
                         return response()->json([
                             "severity" => "error",
                             "summary" => "Error",
-                            "detail" => $user->name . ", You cannot delete yourself."
+                            "detail" => $role->name . ", You cannot delete a user with the same role."
                         ], 422);
-                    // if (auth()->user()->id === 1) //Ejemplo de como se puede proteger el rol de admin desde el controlador
-                    //     return response()->json([
-                    //         "severity" => "error",
-                    //         "summary" => "Error",
-                    //         "detail" => $user->name . ", You cannot delete the main admin."
-                    //     ], 422);
                 }
-                $user->deleteOrFail();
+                $role->deleteOrFail();
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",
-                    "detail" => "User " . $user->name . " was deleted perfectly."
+                    "detail" => "Role " . $role->name . " was deleted perfectly."
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in delete User",
+                    "detail" => "Error in delete Role",
                     "errors" => $th->getMessage()
                 ], 422);
             }
@@ -133,27 +127,27 @@ class UsersController extends Controller
     public function destroyMany(Request $request)
     {
         if (request()->wantsJson()) {
-            $usersID = $request->all();
-            $usersCount = count($usersID);
-            if (!$usersID) {
+            $rolesID = $request->all();
+            $rolesCount = count($rolesID);
+            if (!$rolesID) {
                 return response()->json([
                     'severity' => 'error',
                     'summary' => 'Error',
-                    'detail' => 'List of users is null o undefined.'
+                    'detail' => 'List of roles is null o undefined.'
                 ], 400);
             }
             try {
-                User::whereIn('id', $usersID)->delete();
+                Role::whereIn('id', $rolesID)->delete();
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",
-                    'detail' => $usersCount . ' Users Deleted.'
+                    'detail' => $rolesCount . ' Roles Deleted.'
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     'severity' => 'error',
                     'summary' => 'Error',
-                    'detail' => 'Error to Delete Users.',
+                    'detail' => 'Error to Delete Roles.',
                     'errors' => $th->getMessage()
                 ], 422);
             }
@@ -161,22 +155,22 @@ class UsersController extends Controller
         return "The access for destroy many users is just for JSON request";
     }
 
-    public function getCurrentUserId()
+    public function getCurrentRoleId()
     {
         if (request()->wantsJson()) {
             try {
-                $nextId = DB::table('users')->max('id');
+                $nextId = DB::table('roles')->max('id');
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
-                    "detail" => "Next user id was get perfectly.",
+                    "detail" => "Next role id was get perfectly.",
                     "nextId" => $nextId
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in get next user id",
+                    "detail" => "Error in get next role id",
                     "errors" => $th->getMessage()
                 ], 422);
             }
