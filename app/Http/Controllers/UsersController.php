@@ -18,15 +18,16 @@ class UsersController extends Controller
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
         if (request()->wantsJson())
             try {
-                $rowDatas = User::paginate(
-                    $perPage,
-                    [
-                        "id",
-                        "name",
-                        "email",
-                    ],
-                    "users_page"
-                );
+                $rowDatas = User::orderBy('id', 'asc')
+                    ->paginate(
+                        $perPage,
+                        [
+                            "id",
+                            "name",
+                            "email",
+                        ],
+                        "users_page"
+                    );
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -99,7 +100,8 @@ class UsersController extends Controller
             try {
                 $user = User::findOrFail($id);
                 if (auth()->check()) { //Por el momento este if se usa por que aun no manejo los roles e inicios de sesión
-                    if (auth()->user()->id === $id)
+                    $user = auth()->user();
+                    if ($user->id === $id)
                         return response()->json([
                             "severity" => "error",
                             "summary" => "Error",

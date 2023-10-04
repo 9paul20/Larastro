@@ -72,6 +72,12 @@ const router = createRouter({
                     component: () =>
                         import("@src/views/pages/dashboard/Roles.vue"),
                 },
+                {
+                    path: "/dashboard/permissions",
+                    name: "Permissions",
+                    component: () =>
+                        import("@src/views/pages/dashboard/Permissions.vue"),
+                },
             ],
         },
         {

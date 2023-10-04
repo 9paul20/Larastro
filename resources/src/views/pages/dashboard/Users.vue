@@ -384,13 +384,13 @@ const saveUser = () => {
       if (user.value?.password.trim() && user.value?.password_confirmation.trim()) {
         store
           .storeUser(user.value)
-          .then((resp: any) => {
+          .then((respStore: any) => {
             //console.log(resp);
-            if (resp && resp.severity === "success") {
+            if (respStore && respStore.severity === "success") {
               store
                 .getCurrentUserId()
-                .then((resp: any) => {
-                  lastID.value = resp;
+                .then((respGetId: any) => {
+                  lastID.value = respGetId;
                   user.value.id = lastID.value?.nextId;
                   //console.log("ID: ", lastID.value?.nextId, "User: ", user.value);
                   users.value.push(user.value as Datum);
@@ -403,9 +403,9 @@ const saveUser = () => {
                   };
                   userDialog.value = false;
                   toast.add({
-                    severity: resp.severity,
-                    summary: resp.summary,
-                    detail: resp.detail,
+                    severity: respStore.severity,
+                    summary: respStore.summary,
+                    detail: respStore.detail,
                     life: 3000,
                   });
                 })
@@ -419,15 +419,16 @@ const saveUser = () => {
                     life: 3000,
                   });
                 });
-            } else if (resp.response.status === 422) {
+            } else if (respStore.response.status === 422) {
               toast.add({
-                severity: resp.response.data.severity,
-                summary: resp.response.data.summary,
-                detail: resp.response.data.detail + " " + resp.response.data.name,
+                severity: respStore.response.data.severity,
+                summary: respStore.response.data.summary,
+                detail:
+                  respStore.response.data.detail + " " + respStore.response.data.name,
                 life: 3000,
               });
-              if (resp.response.data.errors) {
-                errors.value = resp.response.data.errors;
+              if (respStore.response.data.errors) {
+                errors.value = respStore.response.data.errors;
               }
             }
           })

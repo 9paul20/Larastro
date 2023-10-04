@@ -14,8 +14,6 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         $RAdmin = Role::create(['name' => 'Admin']);
-        $RAdmin->save();
         $RUser = Role::create(['name' => 'User']);
-        $RUser->save();
     }
 }

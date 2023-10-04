@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RoleRequest;
+use App\Http\Requests\PermissionRequest;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
 
-class RolesController extends Controller
+class PermissionsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,7 +18,7 @@ class RolesController extends Controller
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
         if (request()->wantsJson())
             try {
-                $rowDatas = Role::orderBy('id', 'asc')
+                $rowDatas = Permission::orderBy('id', 'asc')
                     ->paginate(
                         $perPage,
                         [
@@ -26,69 +26,69 @@ class RolesController extends Controller
                             "name",
                             "guard_name",
                         ],
-                        "roles_page"
+                        "permissions_page"
                     );
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in get All Roles",
+                    "detail" => "Error in get All Permissions",
                     "errors" => $th->getMessage()
                 ], 422);
             }
-        return "The access for get all roles is just for JSON request";
+        return "The access for get all permissions is just for JSON request";
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(RoleRequest $request)
+    public function store(PermissionRequest $request)
     {
         if (request()->wantsJson()) {
             try {
-                $role = Role::create($request->all());
+                $permission = Permission::create($request->all());
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
-                    "detail" => "Role " . $role->name . " was created perfectly."
+                    "detail" => "Permission " . $permission->name . " was created perfectly."
                 ]);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in create Role",
+                    "detail" => "Error in create Permission",
                     "errors" => $th->getMessage()
                 ], 422);
             }
         }
-        return "The access for store roles is just for JSON request";
+        return "The access for store permissions is just for JSON request";
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(RoleRequest $request, string $id)
+    public function update(PermissionRequest $request, string $id)
     {
         if (request()->wantsJson()) {
             try {
-                $role = Role::findOrFail($id);
-                $role->updateOrFail($request->all());
+                $permission = Permission::findOrFail($id);
+                $permission->updateOrFail($request->all());
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",
-                    "detail" => "Role " . $role->name . " was updated perfectly."
+                    "detail" => "Permission " . $permission->name . " was updated perfectly."
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in update Role",
+                    "detail" => "Error in update Permission",
                     "errors" => $th->getMessage()
                 ], 422);
             }
         }
-        return "The access for update roles is just for JSON request";
+        return "The access for update permissions is just for JSON request";
     }
 
     /**
@@ -98,85 +98,97 @@ class RolesController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $role = Role::findOrFail($id);
-                if (auth()->check()) { //Por el momento este if se usa por que aun no manejo los roles e inicios de sesión
+                $permission = Permission::findOrFail($id);
+                if (auth()->check()) {
                     $user = auth()->user();
-                    if ($user->hasRole($role->name))
+                    
+                    if ($user->hasPermissionTo($permission->name)) {
                         return response()->json([
                             "severity" => "error",
                             "summary" => "Error",
-                            "detail" => $role->name . ", You cannot delete a user with the same role."
+                            "detail" => "You cannot delete a permission you possess directly."
                         ], 422);
+                    }
+                    $rolesWithPermission = $user->getRoleNames()->filter(function ($role) use ($permission) {
+                        return $role->hasPermissionTo($permission->name);
+                    });
+                    if (!$rolesWithPermission->isEmpty()) {
+                        return response()->json([
+                            "severity" => "error",
+                            "summary" => "Error",
+                            "detail" => "You cannot delete a permission associated with your roles."
+                        ], 422);
+                    }
                 }
-                $role->deleteOrFail();
+                $permission->deleteOrFail();
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",
-                    "detail" => "Role " . $role->name . " was deleted perfectly."
+                    "detail" => "Permission " . $permission->name . " was deleted perfectly."
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in delete Role",
+                    "detail" => "Error in delete Permission",
                     "errors" => $th->getMessage()
                 ], 422);
             }
         }
-        return "The access for destroy roles is just for JSON request";
+        return "The access for destroy permissions is just for JSON request";
     }
 
     public function destroyMany(Request $request)
     {
         if (request()->wantsJson()) {
-            $rolesID = $request->all();
-            $rolesCount = count($rolesID);
-            if (!$rolesID) {
+            $permissionsID = $request->all();
+            $permissionsCount = count($permissionsID);
+            if (!$permissionsID) {
                 return response()->json([
                     'severity' => 'error',
                     'summary' => 'Error',
-                    'detail' => 'List of roles is null o undefined.'
+                    'detail' => 'List of permissions is null o undefined.'
                 ], 400);
             }
             try {
-                Role::whereIn('id', $rolesID)->delete();
+                Permission::whereIn('id', $permissionsID)->delete();
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",
-                    'detail' => $rolesCount . ' Roles Deleted.'
+                    'detail' => $permissionsCount . ' Permissions Deleted.'
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     'severity' => 'error',
                     'summary' => 'Error',
-                    'detail' => 'Error to Delete Roles.',
+                    'detail' => 'Error to Delete Permissions.',
                     'errors' => $th->getMessage()
                 ], 422);
             }
         }
-        return "The access for destroy many roles is just for JSON request";
+        return "The access for destroy many permissions is just for JSON request";
     }
 
-    public function getCurrentRoleId()
+    public function getCurrentPermissionId()
     {
         if (request()->wantsJson()) {
             try {
-                $nextId = DB::table('roles')->max('id');
+                $nextId = DB::table('permissions')->max('id');
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
-                    "detail" => "Next role id was get perfectly.",
+                    "detail" => "Next permission id was get perfectly.",
                     "nextId" => $nextId
                 ], 200);
             } catch (\Throwable $th) {
                 return response()->json([
                     "severity" => "error",
                     "summary" => "Error",
-                    "detail" => "Error in get next role id",
+                    "detail" => "Error in get next permission id",
                     "errors" => $th->getMessage()
                 ], 422);
             }
         }
-        return "The access for get next roles id is just for JSON request";
+        return "The access for get next permissions id is just for JSON request";
     }
 }

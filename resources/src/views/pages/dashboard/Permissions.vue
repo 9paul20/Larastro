@@ -2,20 +2,20 @@
   <div class="grid">
     <div class="col-12">
       <div class="card p-fluid">
-        <h1>Roles</h1>
+        <h1>Permissions</h1>
         <DataTable
           :loading="loading"
           :paginator="true"
           :rows="10"
           :rowsPerPageOptions="[5, 10, 20, 50, 100]"
           :rowHover="true"
-          :value="roles"
+          :value="permissions"
           v-model:filters="filters"
-          v-model:selection="selectedRoles"
+          v-model:selection="selectedPermissions"
           class="p-datatable-gridlines"
           dataKey="id"
           filterDisplay="row"
-          exportFilename="Roles"
+          exportFilename="Permissions"
           ref="dt"
           removableSort
           responsiveLayout="scroll"
@@ -23,7 +23,12 @@
           showGridlines
         >
           <template #paginatorstart>
-            <Button type="button" icon="pi pi-refresh" text @click="getAllRoles()" />
+            <Button
+              type="button"
+              icon="pi pi-refresh"
+              text
+              @click="getAllPermissions()"
+            />
           </template>
           <template #paginatorend>
             <!-- <Button type="button" icon="pi pi-download" text /> -->
@@ -42,7 +47,7 @@
                 icon="pi pi-trash"
                 severity="danger"
                 @click="confirmDeleteSelected"
-                :disabled="!selectedRoles || !selectedRoles.length"
+                :disabled="!selectedPermissions || !selectedPermissions.length"
               />
             </template>
             <template #end>
@@ -54,8 +59,8 @@
               />
             </template>
           </Toolbar>
-          <template #empty> No roles found. </template>
-          <template #loading> Loading roles data. Please wait. </template>
+          <template #empty> No permissions found. </template>
+          <template #loading> Loading permissions data. Please wait. </template>
           <Column
             selectionMode="multiple"
             style="width: 3rem"
@@ -102,27 +107,27 @@
                 outlined
                 rounded
                 class="mr-2"
-                @click="editRole(slotProps.data)"
+                @click="editPermission(slotProps.data)"
               />
               <Button
                 icon="pi pi-trash"
                 outlined
                 rounded
                 severity="danger"
-                @click="confirmDeleteRole(slotProps.data)"
+                @click="confirmDeletePermission(slotProps.data)"
               />
             </template>
           </Column>
           <template #footer>
-            In total there are {{ roles ? roles.length : 0 }} Roles.
+            In total there are {{ permissions ? permissions.length : 0 }} Permissions.
           </template>
         </DataTable>
       </div>
     </div>
 
-    <!-- Dialog Create Role -->
+    <!-- Dialog Create Permission -->
     <Dialog
-      v-model:visible="roleDialog"
+      v-model:visible="permissionDialog"
       :style="{ width: '450px' }"
       header="Role Details"
       :modal="true"
@@ -130,7 +135,7 @@
     >
       <InputNumber
         id="id"
-        v-model.trim="role.id"
+        v-model.trim="permission.id"
         required="true"
         type="number"
         class="hidden"
@@ -139,17 +144,19 @@
         <label for="name">Name</label>
         <InputText
           id="name"
-          v-model.trim="role.name"
+          v-model.trim="permission.name"
           required="true"
           autofocus
           type="text"
           placeholder="Write a name"
           :class="{
-            'p-invalid': (submitted && !role?.name) || errors?.name,
+            'p-invalid': (submitted && !permission?.name) || errors?.name,
           }"
           @blur="hideErrors('name')"
         />
-        <small class="p-error" v-if="submitted && !role?.name">Name is required.</small>
+        <small class="p-error" v-if="submitted && !permission?.name"
+          >Name is required.</small
+        >
         <div v-if="errors?.name">
           <div v-for="(errorName, indexName) in errors.name" :key="indexName">
             <small class="p-error">{{ errorName }}</small>
@@ -158,49 +165,61 @@
       </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
-        <Button label="Save" icon="pi pi-check" text @click="saveRole" />
+        <Button label="Save" icon="pi pi-check" text @click="savePermission" />
       </template>
     </Dialog>
 
-    <!-- Dialog Delete Role -->
+    <!-- Dialog Delete Permission -->
     <Dialog
-      v-model:visible="deleteRoleDialog"
+      v-model:visible="deletePermissionDialog"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
     >
       <div class="confirmation-content">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span v-if="role"
-          >Are you sure you want to delete <b>{{ role.name }}</b
+        <span v-if="permission"
+          >Are you sure you want to delete <b>{{ permission.name }}</b
           >?</span
         >
       </div>
       <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="deleteRoleDialog = false" />
-        <Button label="Yes" icon="pi pi-check" text @click="deleteRole" />
+        <Button
+          label="No"
+          icon="pi pi-times"
+          text
+          @click="deletePermissionDialog = false"
+        />
+        <Button label="Yes" icon="pi pi-check" text @click="deletePermission" />
       </template>
     </Dialog>
 
-    <!-- Dialog Delete Roles -->
+    <!-- Dialog Delete Permissions -->
     <Dialog
-      v-model:visible="deleteRolesDialog"
+      v-model:visible="deletePermissionsDialog"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
     >
       <div class="confirmation-content">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-        <span v-if="roles">Are you sure you want to delete the selected roles?</span>
+        <span v-if="permissions"
+          >Are you sure you want to delete the selected permissions?</span
+        >
       </div>
       <template #footer>
-        <Button label="No" icon="pi pi-times" text @click="deleteRolesDialog = false" />
+        <Button
+          label="No"
+          icon="pi pi-times"
+          text
+          @click="deletePermissionsDialog = false"
+        />
         <Button
           label="Yes"
           icon="pi pi-check"
           text
-          v-if="roles"
-          @click="deleteSelectedRoles"
+          v-if="permissions"
+          @click="deleteSelectedPermissions"
         />
       </template>
     </Dialog>
@@ -210,24 +229,24 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import { rolesStore } from "@js/stores/Roles";
+import { permissionsStore } from "@js/stores/Permissions";
 import { FilterMatchMode } from "primevue/api";
 import { Datum } from "@js/interfaces/Roles/Role";
-import { RoleLastID } from "@js/interfaces/index";
+import { PermissionLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
-const store = rolesStore();
+const store = permissionsStore();
 const dt = ref<any>();
-const role = ref<Datum>();
-const roles = ref<Datum[]>([]);
+const permission = ref<Datum>();
+const permissions = ref<Datum[]>([]);
 const loading = ref<boolean>();
-const roleDialog = ref<boolean>(false);
-const deleteRoleDialog = ref<boolean>(false);
-const deleteRolesDialog = ref<boolean>(false);
-const lastID = ref<RoleLastID>();
+const permissionDialog = ref<boolean>(false);
+const deletePermissionDialog = ref<boolean>(false);
+const deletePermissionsDialog = ref<boolean>(false);
+const lastID = ref<PermissionLastID>();
 const createOrUpdate = ref<boolean>();
 const errors = ref(null);
-const selectedRoles = ref<[]>([]);
+const selectedPermissions = ref<[]>([]);
 const submitted = ref<boolean>(false);
 const filters = ref<{}>({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -238,19 +257,19 @@ const exportCSV = (event: any) => {
   dt.value.exportCSV();
 };
 const openNew = () => {
-  role.value = {
+  permission.value = {
     id: 0,
     name: "",
   };
   submitted.value = false;
-  roleDialog.value = true;
+  permissionDialog.value = true;
   errors.value = null;
 };
 const hideDialog = () => {
-  roleDialog.value = false;
+  permissionDialog.value = false;
   submitted.value = false;
   errors.value = null;
-  role.value = {
+  permission.value = {
     id: 0,
     name: "",
   };
@@ -261,13 +280,13 @@ const hideErrors = (field: string) => {
   }
 };
 //
-const getAllRoles = () => {
+const getAllPermissions = () => {
   loading.value = true;
   store
-    .getAllRoles()
+    .getAllPermissions()
     .then((resp: any) => {
-      roles.value = resp.data;
-      // console.log(roles.value);
+      permissions.value = resp.data;
+      //   console.log(permissions.value);
       loading.value = false;
     })
     .catch((error: string) => {
@@ -276,35 +295,35 @@ const getAllRoles = () => {
       toast.add({
         severity: "error",
         summary: "Error",
-        detail: "Can't get roles list: " + error,
+        detail: "Can't get permissions list: " + error,
         life: 3000,
       });
     });
 };
-const saveRole = () => {
+const savePermission = () => {
   submitted.value = true;
-  createOrUpdate.value = role.value?.id === 0 ? true : false;
+  createOrUpdate.value = permission.value?.id === 0 ? true : false;
 
-  if (role.value?.name.trim()) {
-    // Create Role
+  if (permission.value?.name.trim()) {
+    // Create Permission
     if (createOrUpdate.value) {
       store
-        .storeRole(role.value)
+        .storePermission(permission.value)
         .then((respStore: any) => {
-          //console.log(resp);
+          //console.log(respStore);
           if (respStore && respStore.severity === "success") {
             store
-              .getCurrentRoleId()
+              .getCurrentPermissionId()
               .then((respGetId: any) => {
                 lastID.value = respGetId;
-                role.value.id = lastID.value?.nextId;
-                //console.log("ID: ", lastID.value?.nextId, "Role: ", role.value);
-                roles.value.push(role.value as Datum);
-                role.value = {
+                permission.value.id = lastID.value?.nextId;
+                //console.log("ID: ", lastID.value?.nextId, "Permission: ", permission.value);
+                permissions.value.push(permission.value as Datum);
+                permission.value = {
                   id: 0,
                   name: "",
                 };
-                roleDialog.value = false;
+                permissionDialog.value = false;
                 toast.add({
                   severity: respStore.severity,
                   summary: respStore.summary,
@@ -318,7 +337,7 @@ const saveRole = () => {
                 toast.add({
                   severity: "error",
                   summary: "Error",
-                  detail: "Can't get last id of roles: " + error,
+                  detail: "Can't get last id of permissions: " + error,
                   life: 3000,
                 });
               });
@@ -344,15 +363,15 @@ const saveRole = () => {
           console.error(error);
         });
     }
-    // Update Role
+    // Update Permission
     else {
       store
-        .updateRole(role.value)
+        .updatePermission(permission.value)
         .then((resp: any) => {
           //console.log(resp);
           if (resp && resp.severity === "info") {
-            roles.value[findIndexById(role.value.id)] = role.value;
-            roleDialog.value = false;
+            permissions.value[findIndexById(permission.value.id)] = permission.value;
+            permissionDialog.value = false;
             toast.add({
               severity: resp.severity,
               summary: resp.summary,
@@ -383,29 +402,31 @@ const saveRole = () => {
     }
   }
 };
-const editRole = (prod: Datum) => {
-  role.value = { ...prod };
-  roleDialog.value = true;
+const editPermission = (prod: Datum) => {
+  permission.value = { ...prod };
+  permissionDialog.value = true;
   submitted.value = false;
   errors.value = null;
 };
-const confirmDeleteRole = (prod: Datum) => {
-  role.value = prod;
-  deleteRoleDialog.value = true;
+const confirmDeletePermission = (prod: Datum) => {
+  permission.value = prod;
+  deletePermissionDialog.value = true;
 };
-const deleteRole = () => {
-  if (role.value) {
+const deletePermission = () => {
+  if (permission.value) {
     store
-      .destroyRole(role.value)
+      .destroyPermission(permission.value)
       .then((resp: any) => {
         //console.log(resp);
         if (resp.severity === "warn") {
-          roles.value = roles.value.filter((val) => val.id !== role.value?.id);
-          role.value = {
+          permissions.value = permissions.value.filter(
+            (val) => val.id !== permission.value?.id
+          );
+          permission.value = {
             id: 0,
             name: "",
           };
-          deleteRoleDialog.value = false;
+          deletePermissionDialog.value = false;
           toast.add({
             severity: resp.severity,
             summary: resp.summary,
@@ -434,8 +455,8 @@ const deleteRole = () => {
 };
 const findIndexById = (id: number) => {
   let index = -1;
-  for (let i = 0; i < roles.value.length; i++) {
-    if (roles.value[i].id === id) {
+  for (let i = 0; i < permissions.value.length; i++) {
+    if (permissions.value[i].id === id) {
       index = i;
       break;
     }
@@ -444,23 +465,23 @@ const findIndexById = (id: number) => {
   return index;
 };
 const confirmDeleteSelected = () => {
-  deleteRolesDialog.value = true;
+  deletePermissionsDialog.value = true;
 };
-const deleteSelectedRoles = () => {
-  const rolesID = ref<{ id: number }[]>([]);
-  selectedRoles.value.forEach((selectedRole: Datum) => {
-    rolesID.value.push({ id: selectedRole.id });
+const deleteSelectedPermissions = () => {
+  const permissionsID = ref<{ id: number }[]>([]);
+  selectedPermissions.value.forEach((selectedPermission: Datum) => {
+    permissionsID.value.push({ id: selectedPermission.id });
   });
   store
-    .destroyRoles(rolesID.value)
+    .destroyPermissions(permissionsID.value)
     .then((resp: any) => {
       // console.log(resp);
       if (resp.severity === "warn") {
-        roles.value = roles.value.filter(
-          (val) => !selectedRoles.value.includes(val as never)
+        permissions.value = permissions.value.filter(
+          (val) => !selectedPermissions.value.includes(val as never)
         );
-        deleteRolesDialog.value = false;
-        selectedRoles.value = [];
+        deletePermissionsDialog.value = false;
+        selectedPermissions.value = [];
         toast.add({
           severity: resp.severity,
           summary: resp.summary,
@@ -468,8 +489,8 @@ const deleteSelectedRoles = () => {
           life: 3000,
         });
       } else if (resp.severity === "warn") {
-        deleteRolesDialog.value = false;
-        selectedRoles.value = [];
+        deletePermissionsDialog.value = false;
+        selectedPermissions.value = [];
         toast.add({
           severity: resp.severity,
           summary: resp.summary,
@@ -497,7 +518,7 @@ const deleteSelectedRoles = () => {
 };
 //
 onBeforeMount(() => {
-  getAllRoles();
+  getAllPermissions();
 });
 </script>
 
