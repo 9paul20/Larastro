@@ -423,7 +423,7 @@ const saveUser = () => {
               toast.add({
                 severity: resp.response.data.severity,
                 summary: resp.response.data.summary,
-                detail: resp.response.data.detail + " " + resp.response.data.errors,
+                detail: resp.response.data.detail + " " + resp.response.data.name,
                 life: 3000,
               });
               if (resp.response.data.errors) {
@@ -461,7 +461,7 @@ const saveUser = () => {
             toast.add({
               severity: resp.response.data.severity,
               summary: resp.response.data.summary,
-              detail: resp.response.data.detail + " " + resp.response.data.errors,
+              detail: resp.response.data.detail + " " + resp.response.data.name,
               life: 3000,
             });
             if (resp.response.data.errors) {
@@ -517,7 +517,7 @@ const deleteUser = () => {
           toast.add({
             severity: resp.response.data.severity,
             summary: resp.response.data.summary,
-            detail: resp.response.data.detail + ", " + resp.response.data.errors,
+            detail: resp.response.data.detail + ", " + resp.response.data.name,
             life: 3000,
           });
         }
@@ -581,7 +581,7 @@ const deleteSelectedUsers = () => {
         toast.add({
           severity: resp.response.data.severity,
           summary: resp.response.data.summary,
-          detail: resp.response.data.detail + " " + resp.response.data.errors,
+          detail: resp.response.data.detail + " " + resp.response.data.name,
           life: 3000,
         });
       }
