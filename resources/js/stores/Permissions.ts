@@ -1,7 +1,7 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import type { Permission } from "../interfaces";
-import { Datum } from "@js/interfaces/Permissions/Permission";
+import { DatumPermission } from "@js/interfaces/Permissions/Permission";
 
 export const permissionsStore = defineStore('permissionsStore', () => {
     //
@@ -14,28 +14,28 @@ export const permissionsStore = defineStore('permissionsStore', () => {
         }
     };
     //
-    const storePermission = async (permission: Datum): Promise<Datum> => {
+    const storePermission = async (permission: DatumPermission): Promise<DatumPermission> => {
         try {
-            const resp = await axios.post<Datum>('http://localhost:8000/api/permissions', permission);
-            return resp.data as Datum;
+            const resp = await axios.post<DatumPermission>('http://localhost:8000/api/permissions', permission);
+            return resp.data as DatumPermission;
         } catch (error) {
             return error as any;
         }
     };
     //
-    const updatePermission = async (permission: Datum): Promise<Datum> => {
+    const updatePermission = async (permission: DatumPermission): Promise<DatumPermission> => {
         try {
-            const resp = await axios.put<Datum>(`http://localhost:8000/api/permissions/${permission.id}`, permission);
-            return resp.data as Datum;
+            const resp = await axios.put<DatumPermission>(`http://localhost:8000/api/permissions/${permission.id}`, permission);
+            return resp.data as DatumPermission;
         } catch (error) {
             return error as any;
         }
     };
     //
-    const destroyPermission = async (permission: Datum): Promise<Datum> => {
+    const destroyPermission = async (permission: DatumPermission): Promise<DatumPermission> => {
         try {
-            const resp = await axios.delete<Datum>(`http://localhost:8000/api/permissions/${permission.id}`);
-            return resp.data as Datum;
+            const resp = await axios.delete<DatumPermission>(`http://localhost:8000/api/permissions/${permission.id}`);
+            return resp.data as DatumPermission;
         } catch (error) {
             return error as any;
         }

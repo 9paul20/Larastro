@@ -26,6 +26,8 @@ class PermissionRequest extends FormRequest
         $id = $this->segment(count($this->segments()));
         return [
             'name' => 'required|string|min:4|max:255|unique:permissions,name,' . $id . ',id',
+            'description' => 'nullable|string|min:4|max:255',
+            'tags' => 'nullable|string|min:4|max:255',
         ];
     }
 
@@ -34,6 +36,12 @@ class PermissionRequest extends FormRequest
         return [
             'name.required' => 'Please Provide Your Name For Better Communication, Thank You.',
             'name.unique' => 'Sorry, This Name Is Already Used By Another Role. Please Try With Different One, Thank You.',
+            'name.min' => 'Please Provide Your Name With Minimum 4 Characters, Thank You.',
+            'name.max' => 'Please Provide Your Name With Maximum 255 Characters, Thank You.',
+            'description.min' => 'Please Provide Your Description With Minimum 4 Characters, Thank You.',
+            'description.max' => 'Please Provide Your Description With Maximum 255 Characters, Thank You.',
+            'tags.min' => 'Please Provide Your Tags With Minimum 4 Characters, Thank You.',
+            'tags.max' => 'Please Provide Your Tags With Maximum 255 Characters, Thank You.',
         ];
     }
 

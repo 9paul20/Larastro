@@ -25,9 +25,15 @@ class RolesController extends Controller
                             "id",
                             "name",
                             "guard_name",
+                            "description",
+                            "tags",
                         ],
                         "roles_page"
                     );
+                $rowDatas->transform(function ($role) {
+                    $role->tags = explode(', ', $role->tags);
+                    return $role;
+                });
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -48,6 +54,11 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             try {
                 $role = Role::create($request->all());
+                if ($request->has('tags')) {
+                    $tags = implode(', ', $request->tags);
+                    $role->tags = $tags;
+                    $role->save();
+                }
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -74,6 +85,11 @@ class RolesController extends Controller
             try {
                 $role = Role::findOrFail($id);
                 $role->updateOrFail($request->all());
+                if ($request->has('tags')) {
+                    $tags = implode(', ', $request->tags);
+                    $role->tags = $tags;
+                    $role->save();
+                }
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",

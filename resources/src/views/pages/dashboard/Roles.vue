@@ -95,6 +95,39 @@
               />
             </template>
           </Column>
+          <Column
+            field="description"
+            header="Description"
+            sortable
+            style="min-width: 12rem"
+          >
+            <template #body="{ data }">
+              {{ data.description ? data.description : "Without Description" }}
+            </template>
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="p-column-filter"
+                @input="filterCallback()"
+                placeholder="Search by Description"
+              />
+            </template>
+          </Column>
+          <Column field="tags" header="Tags" sortable style="min-width: 12rem">
+            <template #body="{ data }">
+              {{ data.tags ? data.tags.join(", ") : "Without Tags" }}
+            </template>
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="p-column-filter"
+                @input="filterCallback()"
+                placeholder="Search by Tags"
+              />
+            </template>
+          </Column>
           <Column :exportable="false" style="min-width: 8rem">
             <template #body="slotProps">
               <Button
@@ -156,6 +189,199 @@
           </div>
         </div>
       </div>
+      <div class="field">
+        <label for="description">Description</label>
+        <InputText
+          id="description"
+          v-model.trim="role.description"
+          required="false"
+          type="text"
+          placeholder="Write a description"
+          :class="{
+            'p-invalid': errors?.description,
+          }"
+          @blur="hideErrors('description')"
+        />
+        <!-- <small class="p-error" v-if="submitted && !role?.description"
+          >Description is required.</small
+        > -->
+        <div v-if="errors?.description">
+          <div
+            v-for="(errorDescription, indexDescription) in errors.description"
+            :key="indexDescription"
+          >
+            <small class="p-error">{{ errorDescription }}</small>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="tags">Tags</label>
+        <Chips
+          id="tags"
+          v-model.trim="role.tags"
+          separator=","
+          required="false"
+          placeholder="Write a description"
+          :class="{
+            'p-invalid': errors?.tags,
+          }"
+          @blur="hideErrors('tags')"
+        />
+        <!-- <small class="p-error" v-if="submitted && !role?.tags">Tags is required.</small> -->
+        <div v-if="errors">
+          <small class="p-error">{{ errors }}</small>
+          <div v-for="(errorTags, indexTags) in errors.tags" :key="indexTags">
+            <small class="p-error">{{ errorTags }}</small>
+            <div v-for="(error, index) in errors.tags.errorTags" :key="index">
+              <small class="p-error">{{ error }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h5>Permissions</h5>
+      <div class="card px-3 py-3">
+        <h5>Users</h5>
+        <div class="grid">
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption1"
+                name="option"
+                value="Create"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption1">Create</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption2"
+                name="option"
+                value="Read"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption2">Read</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption3"
+                name="option"
+                value="Update"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption3">Update</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption3"
+                name="option"
+                value="Delete"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption3">Delete</label>
+            </div>
+          </div>
+        </div>
+        <h5 class="my-3">Users</h5>
+        <div class="grid">
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption1"
+                name="option"
+                value="Create"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption1">Create</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption2"
+                name="option"
+                value="Read"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption2">Read</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption3"
+                name="option"
+                value="Update"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption3">Update</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption3"
+                name="option"
+                value="Delete"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption3">Delete</label>
+            </div>
+          </div>
+        </div>
+        <h5 class="my-3">Users</h5>
+        <div class="grid">
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption1"
+                name="option"
+                value="Create"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption1">Create</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption2"
+                name="option"
+                value="Read"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption2">Read</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption3"
+                name="option"
+                value="Update"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption3">Update</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-3">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                id="checkOption3"
+                name="option"
+                value="Delete"
+                v-model="checkboxValue"
+              />
+              <label for="checkOption3">Delete</label>
+            </div>
+          </div>
+        </div>
+      </div>
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
         <Button label="Save" icon="pi pi-check" text @click="saveRole" />
@@ -211,15 +437,20 @@
 import { onBeforeMount, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { rolesStore } from "@js/stores/Roles";
+import { permissionsStore } from "@js/stores/Permissions";
 import { FilterMatchMode } from "primevue/api";
-import { Datum } from "@js/interfaces/Roles/Role";
+import { DatumRole } from "@js/interfaces/Roles/Role";
+import { DatumPermission } from "@js/interfaces/Permissions/Permission";
 import { RoleLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
 const store = rolesStore();
+const storePermissions = permissionsStore();
 const dt = ref<any>();
-const role = ref<Datum>();
-const roles = ref<Datum[]>([]);
+const role = ref<DatumRole>();
+const roles = ref<DatumRole[]>([]);
+const permissions = ref<DatumPermission[]>([]);
+const checkboxValue = ref([]);
 const loading = ref<boolean>();
 const roleDialog = ref<boolean>(false);
 const deleteRoleDialog = ref<boolean>(false);
@@ -233,6 +464,8 @@ const filters = ref<{}>({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  description: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  tags: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const exportCSV = (event: any) => {
   dt.value.exportCSV();
@@ -241,6 +474,8 @@ const openNew = () => {
   role.value = {
     id: 0,
     name: "",
+    description: "",
+    tags: [],
   };
   submitted.value = false;
   roleDialog.value = true;
@@ -253,7 +488,10 @@ const hideDialog = () => {
   role.value = {
     id: 0,
     name: "",
+    description: "",
+    tags: [],
   };
+  checkboxValue.value = [];
 };
 const hideErrors = (field: string) => {
   if (errors.value && field in errors.value) {
@@ -281,6 +519,25 @@ const getAllRoles = () => {
       });
     });
 };
+const getAllPermissions = () => {
+  storePermissions
+    .getAllPermissions()
+    .then((resp: any) => {
+      permissions.value = resp.data;
+      console.log(permissions.value);
+      loading.value = false;
+    })
+    .catch((error: string) => {
+      console.error(error);
+      loading.value = false;
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get permissions list: " + error,
+        life: 3000,
+      });
+    });
+};
 const saveRole = () => {
   submitted.value = true;
   createOrUpdate.value = role.value?.id === 0 ? true : false;
@@ -297,14 +554,17 @@ const saveRole = () => {
               .getCurrentRoleId()
               .then((respGetId: any) => {
                 lastID.value = respGetId;
+                roleDialog.value = false;
                 role.value.id = lastID.value?.nextId;
+                role.value.tags = role.value.tags.join(", ");
                 //console.log("ID: ", lastID.value?.nextId, "Role: ", role.value);
-                roles.value.push(role.value as Datum);
+                roles.value.push(role.value as DatumRole);
                 role.value = {
                   id: 0,
                   name: "",
+                  description: "",
+                  tags: [],
                 };
-                roleDialog.value = false;
                 toast.add({
                   severity: respStore.severity,
                   summary: respStore.summary,
@@ -331,6 +591,7 @@ const saveRole = () => {
             });
             if (respStore.response.data.errors) {
               errors.value = respStore.response.data.errors;
+              console.log(errors.value);
             }
           }
         })
@@ -383,13 +644,13 @@ const saveRole = () => {
     }
   }
 };
-const editRole = (prod: Datum) => {
+const editRole = (prod: DatumRole) => {
   role.value = { ...prod };
   roleDialog.value = true;
   submitted.value = false;
   errors.value = null;
 };
-const confirmDeleteRole = (prod: Datum) => {
+const confirmDeleteRole = (prod: DatumRole) => {
   role.value = prod;
   deleteRoleDialog.value = true;
 };
@@ -404,6 +665,8 @@ const deleteRole = () => {
           role.value = {
             id: 0,
             name: "",
+            description: "",
+            tags: [],
           };
           deleteRoleDialog.value = false;
           toast.add({
@@ -448,7 +711,7 @@ const confirmDeleteSelected = () => {
 };
 const deleteSelectedRoles = () => {
   const rolesID = ref<{ id: number }[]>([]);
-  selectedRoles.value.forEach((selectedRole: Datum) => {
+  selectedRoles.value.forEach((selectedRole: DatumRole) => {
     rolesID.value.push({ id: selectedRole.id });
   });
   store
@@ -498,6 +761,7 @@ const deleteSelectedRoles = () => {
 //
 onBeforeMount(() => {
   getAllRoles();
+  getAllPermissions();
 });
 </script>
 

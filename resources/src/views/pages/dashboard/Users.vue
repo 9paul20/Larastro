@@ -300,14 +300,14 @@ import { onBeforeMount, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { FilterMatchMode } from "primevue/api";
 import { usersStore } from "@js/stores/Users";
-import { Datum } from "@js/interfaces/Users/User";
+import { DatumUser } from "@js/interfaces/Users/User";
 import { UserLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
 const store = usersStore();
 const dt = ref<any>();
-const user = ref<Datum>();
-const users = ref<Datum[]>([]);
+const user = ref<DatumUser>();
+const users = ref<DatumUser[]>([]);
 const loading = ref<boolean>();
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
@@ -393,7 +393,7 @@ const saveUser = () => {
                   lastID.value = respGetId;
                   user.value.id = lastID.value?.nextId;
                   //console.log("ID: ", lastID.value?.nextId, "User: ", user.value);
-                  users.value.push(user.value as Datum);
+                  users.value.push(user.value as DatumUser);
                   user.value = {
                     id: 0,
                     name: "",
@@ -482,13 +482,13 @@ const saveUser = () => {
     }
   }
 };
-const editUser = (prod: Datum) => {
+const editUser = (prod: DatumUser) => {
   user.value = { ...prod };
   userDialog.value = true;
   submitted.value = false;
   errors.value = null;
 };
-const confirmDeleteUser = (prod: Datum) => {
+const confirmDeleteUser = (prod: DatumUser) => {
   user.value = prod;
   deleteUserDialog.value = true;
 };
@@ -550,7 +550,7 @@ const confirmDeleteSelected = () => {
 };
 const deleteSelectedUsers = () => {
   const usersID = ref<{ id: number }[]>([]);
-  selectedUsers.value.forEach((selectedUser: Datum) => {
+  selectedUsers.value.forEach((selectedUser: DatumUser) => {
     usersID.value.push({ id: selectedUser.id });
   });
   store

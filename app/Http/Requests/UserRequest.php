@@ -37,9 +37,12 @@ class UserRequest extends FormRequest
         return [
             'name.required' => 'Please Provide Your Name For Better Communication, Thank You.',
             'name.unique' => 'Sorry, This Name Is Already Used By Another User. Please Try With Different One, Thank You.',
+            'name.min' => 'Please Provide Your Name With Minimum 4 Characters, Thank You.',
+            'name.max' => 'Please Provide Your Name With Maximum 255 Characters, Thank You.',
             'email.required' => 'Please Provide Your Email Address For Better Communication, Thank You.',
             'email.unique' => 'Sorry, This Email Address Is Already Used By Another User. Please Try With Different One, Thank You.',
             'password.min' => 'Password Length Should Be More Than 4 Character Or Digit Or Mix, Thank You.',
+            'password.max' => 'Password Length Should Be Less Than 255 Character Or Digit Or Mix, Thank You.',
             'password.regex' => 'Password Should Be Mix Of Character And Digit, Thank You.',
             'password_confirmation.same' => 'Password And Confirm Password Should Be Same, Thank You.',
         ];

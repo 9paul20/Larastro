@@ -26,14 +26,30 @@ class RoleRequest extends FormRequest
         $id = $this->segment(count($this->segments()));
         return [
             'name' => 'required|string|min:4|max:255|unique:roles,name,' . $id . ',id',
+            'description' => 'nullable|string|min:4|max:255',
+            'tags' => 'nullable|array|min:1|max:255',
+            'tags.*' => 'nullable|string|distinct|min:4|max:255',
         ];
     }
 
     public function messages(): array
     {
         return [
+            'name.string' => 'Please Provide Your Name As String, Thank You.',
             'name.required' => 'Please Provide Your Name For Better Communication, Thank You.',
             'name.unique' => 'Sorry, This Name Is Already Used By Another Role. Please Try With Different One, Thank You.',
+            'name.min' => 'Please Provide Your Name With Minimum 4 Characters, Thank You.',
+            'name.max' => 'Please Provide Your Name With Maximum 255 Characters, Thank You.',
+            'description.string' => 'Please Provide Your Description As String, Thank You.',
+            'description.min' => 'Please Provide Your Description With Minimum 4 Characters, Thank You.',
+            'description.max' => 'Please Provide Your Description With Maximum 255 Characters, Thank You.',
+            'tags.array' => 'Please Provide Your Tags As Array, Thank You.',
+            'tags.min' => 'Please Provide Your Tags With Minimum 1 Tag, Thank You.',
+            'tags.max' => 'Please Provide Your Tags With Maximum 255 Tags, Thank You.',
+            'tags.*.string' => 'Please Provide Your Tags As String, Thank You.',
+            'tags.*.distinct' => 'Please Provide Your Tags Without Duplicates, Thank You.',
+            'tags.*.min' => 'Please Provide Your Tags With Minimum 4 Characters, Thank You.',
+            'tags.*.max' => 'Please Provide Your Tags With Maximum 255 Characters, Thank You.',
         ];
     }
 

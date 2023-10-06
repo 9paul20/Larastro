@@ -1,7 +1,7 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import type { User } from "../interfaces";
-import { Datum } from "@js/interfaces/Users/User";
+import { DatumUser } from "@js/interfaces/Users/User";
 
 export const usersStore = defineStore('usersStore', () => {
     //
@@ -14,28 +14,28 @@ export const usersStore = defineStore('usersStore', () => {
         }
     };
     //
-    const storeUser = async (user: Datum): Promise<Datum> => {
+    const storeUser = async (user: DatumUser): Promise<DatumUser> => {
         try {
-            const resp = await axios.post<Datum>('http://localhost:8000/api/users', user);
-            return resp.data as Datum;
+            const resp = await axios.post<DatumUser>('http://localhost:8000/api/users', user);
+            return resp.data as DatumUser;
         } catch (error) {
             return error as any;
         }
     };
     //
-    const updateUser = async (user: Datum): Promise<Datum> => {
+    const updateUser = async (user: DatumUser): Promise<DatumUser> => {
         try {
-            const resp = await axios.put<Datum>(`http://localhost:8000/api/users/${user.id}`, user);
-            return resp.data as Datum;
+            const resp = await axios.put<DatumUser>(`http://localhost:8000/api/users/${user.id}`, user);
+            return resp.data as DatumUser;
         } catch (error) {
             return error as any;
         }
     };
     //
-    const destroyUser = async (user: Datum): Promise<Datum> => {
+    const destroyUser = async (user: DatumUser): Promise<DatumUser> => {
         try {
-            const resp = await axios.delete<Datum>(`http://localhost:8000/api/users/${user.id}`);
-            return resp.data as Datum;
+            const resp = await axios.delete<DatumUser>(`http://localhost:8000/api/users/${user.id}`);
+            return resp.data as DatumUser;
         } catch (error) {
             return error as any;
         }

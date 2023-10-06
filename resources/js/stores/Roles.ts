@@ -1,7 +1,7 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import type { Role } from "../interfaces";
-import { Datum } from "@js/interfaces/Roles/Role";
+import { DatumRole } from "@js/interfaces/Roles/Role";
 
 export const rolesStore = defineStore('rolesStore', () => {
     //
@@ -14,28 +14,28 @@ export const rolesStore = defineStore('rolesStore', () => {
         }
     };
     //
-    const storeRole = async (role: Datum): Promise<Datum> => {
+    const storeRole = async (role: DatumRole): Promise<DatumRole> => {
         try {
-            const resp = await axios.post<Datum>('http://localhost:8000/api/roles', role);
-            return resp.data as Datum;
+            const resp = await axios.post<DatumRole>('http://localhost:8000/api/roles', role);
+            return resp.data as DatumRole;
         } catch (error) {
             return error as any;
         }
     };
     //
-    const updateRole = async (role: Datum): Promise<Datum> => {
+    const updateRole = async (role: DatumRole): Promise<DatumRole> => {
         try {
-            const resp = await axios.put<Datum>(`http://localhost:8000/api/roles/${role.id}`, role);
-            return resp.data as Datum;
+            const resp = await axios.put<DatumRole>(`http://localhost:8000/api/roles/${role.id}`, role);
+            return resp.data as DatumRole;
         } catch (error) {
             return error as any;
         }
     };
     //
-    const destroyRole = async (role: Datum): Promise<Datum> => {
+    const destroyRole = async (role: DatumRole): Promise<DatumRole> => {
         try {
-            const resp = await axios.delete<Datum>(`http://localhost:8000/api/roles/${role.id}`);
-            return resp.data as Datum;
+            const resp = await axios.delete<DatumRole>(`http://localhost:8000/api/roles/${role.id}`);
+            return resp.data as DatumRole;
         } catch (error) {
             return error as any;
         }

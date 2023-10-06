@@ -1,11 +1,11 @@
 export interface Permission {
     current_page: number;
-    data: Datum[];
+    data: DatumPermission[];
     first_page_url: string;
     from: number;
     last_page: number;
     last_page_url: string;
-    links: Link[];
+    links: LinkPermission[];
     next_page_url: null;
     path: string;
     per_page: number;
@@ -14,17 +14,19 @@ export interface Permission {
     total: number;
 }
 
-export interface Datum {
-    guard_name: GuardName;
+export interface DatumPermission {
+    description: string;
+    guard_name: string;
     id: number;
     name: string;
+    tags: string[];
 }
 
-export enum GuardName {
+export enum GuardNamePermission {
     Web = "web",
 }
 
-export interface Link {
+export interface LinkPermission {
     active: boolean;
     label: string;
     url: null | string;

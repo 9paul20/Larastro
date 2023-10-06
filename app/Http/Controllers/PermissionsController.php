@@ -25,6 +25,8 @@ class PermissionsController extends Controller
                             "id",
                             "name",
                             "guard_name",
+                            "description",
+                            "tags",
                         ],
                         "permissions_page"
                     );
