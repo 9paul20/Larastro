@@ -202,9 +202,6 @@
           }"
           @blur="hideErrors('description')"
         />
-        <!-- <small class="p-error" v-if="submitted && !role?.description"
-          >Description is required.</small
-        > -->
         <div v-if="errors?.description">
           <div
             v-for="(errorDescription, indexDescription) in errors.description"
@@ -227,14 +224,14 @@
           }"
           @blur="hideErrors('tags')"
         />
-        <!-- <small class="p-error" v-if="submitted && !role?.tags">Tags is required.</small> -->
-        <div v-if="errors">
-          <small class="p-error">{{ errors }}</small>
-          <div v-for="(errorTags, indexTags) in errors.tags" :key="indexTags">
-            <small class="p-error">{{ errorTags }}</small>
-            <div v-for="(error, index) in errors.tags.errorTags" :key="index">
-              <small class="p-error">{{ error }}</small>
-            </div>
+        <div v-for="(error, key) in errors" :key="key">
+          <div v-if="typeof key === 'string' && key.startsWith('tags')">
+            <span v-for="(errorMsg, index) in error" :key="index">
+              <small class="p-error">{{ errorMsg }}</small>
+            </span>
+          </div>
+          <div v-else>
+            <small class="p-error"></small>
           </div>
         </div>
       </div>
@@ -494,7 +491,7 @@ const hideDialog = () => {
   checkboxValue.value = [];
 };
 const hideErrors = (field: string) => {
-  if (errors.value && field in errors.value) {
+  if (errors.value && (field in errors.value || field + "." in errors.value)) {
     errors.value[field] = null as never;
   }
 };
@@ -543,6 +540,7 @@ const saveRole = () => {
   createOrUpdate.value = role.value?.id === 0 ? true : false;
 
   if (role.value?.name.trim()) {
+    console.log(role.value);
     // Create Role
     if (createOrUpdate.value) {
       store
@@ -589,9 +587,10 @@ const saveRole = () => {
               detail: respStore.response.data.detail + " " + respStore.response.data.name,
               life: 3000,
             });
-            if (respStore.response.data.errors) {
+            console.error(respStore.response.data);
+            if (respStore.response.data) {
               errors.value = respStore.response.data.errors;
-              console.log(errors.value);
+              // console.log(errors.value);
             }
           }
         })

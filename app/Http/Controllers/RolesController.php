@@ -54,7 +54,7 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             try {
                 $role = Role::create($request->all());
-                if ($request->has('tags')) {
+                if ($request->has('tags') && is_array($request->tags)) {
                     $tags = implode(', ', $request->tags);
                     $role->tags = $tags;
                     $role->save();
