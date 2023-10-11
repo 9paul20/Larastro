@@ -218,7 +218,7 @@
           v-model.trim="role.tags"
           separator=","
           required="false"
-          placeholder="Write a description"
+          placeholder="Write a tags"
           :class="{
             'p-invalid': errors?.tags,
           }"
@@ -540,13 +540,12 @@ const saveRole = () => {
   createOrUpdate.value = role.value?.id === 0 ? true : false;
 
   if (role.value?.name.trim()) {
-    console.log(role.value);
+    // console.log(role.value);
     // Create Role
     if (createOrUpdate.value) {
       store
         .storeRole(role.value)
         .then((respStore: any) => {
-          //console.log(resp);
           if (respStore && respStore.severity === "success") {
             store
               .getCurrentRoleId()
@@ -554,8 +553,7 @@ const saveRole = () => {
                 lastID.value = respGetId;
                 roleDialog.value = false;
                 role.value.id = lastID.value?.nextId;
-                role.value.tags = role.value.tags.join(", ");
-                //console.log("ID: ", lastID.value?.nextId, "Role: ", role.value);
+                // console.log("ID: ", lastID.value?.nextId, "Role: ", role.value);
                 roles.value.push(role.value as DatumRole);
                 role.value = {
                   id: 0,
@@ -587,10 +585,9 @@ const saveRole = () => {
               detail: respStore.response.data.detail + " " + respStore.response.data.name,
               life: 3000,
             });
-            console.error(respStore.response.data);
+            console.error(respStore.response);
             if (respStore.response.data) {
               errors.value = respStore.response.data.errors;
-              // console.log(errors.value);
             }
           }
         })

@@ -53,11 +53,10 @@ class RolesController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $role = Role::create($request->all());
                 if ($request->has('tags') && is_array($request->tags)) {
-                    $tags = implode(', ', $request->tags);
-                    $role->tags = $tags;
-                    $role->save();
+                    $tagsToString = implode(', ', $request->tags);
+                    $request->merge(['tags' => $tagsToString]);
+                    $role = Role::create($request->all());
                 }
                 return response()->json([
                     "severity" => "success",
@@ -83,11 +82,11 @@ class RolesController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $role = Role::findOrFail($id);
-                $role->updateOrFail($request->all());
                 if ($request->has('tags')) {
-                    $tags = implode(', ', $request->tags);
-                    $role->tags = $tags;
+                    $tagsToString = implode(', ', $request->tags);
+                    $request->merge(['tags' => $tagsToString]);
+                    $role = Role::findOrFail($id);
+                    $role->updateOrFail($request->all());
                     $role->save();
                 }
                 return response()->json([

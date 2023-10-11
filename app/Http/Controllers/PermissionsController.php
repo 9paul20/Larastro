@@ -30,6 +30,10 @@ class PermissionsController extends Controller
                         ],
                         "permissions_page"
                     );
+                $rowDatas->transform(function ($permission) {
+                    $permission->tags = explode(', ', $permission->tags);
+                    return $permission;
+                });
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -49,7 +53,11 @@ class PermissionsController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $permission = Permission::create($request->all());
+                if ($request->has('tags') && is_array($request->tags)) {
+                    $tagsToString = implode(', ', $request->tags);
+                    $request->merge(['tags' => $tagsToString]);
+                    $permission = Permission::create($request->all());
+                }
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -74,8 +82,13 @@ class PermissionsController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $permission = Permission::findOrFail($id);
-                $permission->updateOrFail($request->all());
+                if ($request->has('tags')) {
+                    $tagsToString = implode(', ', $request->tags);
+                    $request->merge(['tags' => $tagsToString]);
+                    $permission = Permission::findOrFail($id);
+                    $permission->updateOrFail($request->all());
+                    $permission->save();
+                }
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",
@@ -103,7 +116,7 @@ class PermissionsController extends Controller
                 $permission = Permission::findOrFail($id);
                 if (auth()->check()) {
                     $user = auth()->user();
-                    
+
                     if ($user->hasPermissionTo($permission->name)) {
                         return response()->json([
                             "severity" => "error",

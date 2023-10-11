@@ -100,6 +100,39 @@
               />
             </template>
           </Column>
+          <Column
+            field="description"
+            header="Description"
+            sortable
+            style="min-width: 12rem"
+          >
+            <template #body="{ data }">
+              {{ data.description ? data.description : "Without Description" }}
+            </template>
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="p-column-filter"
+                @input="filterCallback()"
+                placeholder="Search by Description"
+              />
+            </template>
+          </Column>
+          <Column field="tags" header="Tags" sortable style="min-width: 12rem">
+            <template #body="{ data }">
+              {{ data.tags ? data.tags.join(", ") : "Without Tags" }}
+            </template>
+            <template #filter="{ filterModel, filterCallback }">
+              <InputText
+                v-model="filterModel.value"
+                type="text"
+                class="p-column-filter"
+                @input="filterCallback()"
+                placeholder="Search by Tags"
+              />
+            </template>
+          </Column>
           <Column :exportable="false" style="min-width: 8rem">
             <template #body="slotProps">
               <Button
@@ -160,6 +193,52 @@
         <div v-if="errors?.name">
           <div v-for="(errorName, indexName) in errors.name" :key="indexName">
             <small class="p-error">{{ errorName }}</small>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="description">Description</label>
+        <InputText
+          id="description"
+          v-model.trim="permission.description"
+          required="false"
+          type="text"
+          placeholder="Write a description"
+          :class="{
+            'p-invalid': errors?.description,
+          }"
+          @blur="hideErrors('description')"
+        />
+        <div v-if="errors?.description">
+          <div
+            v-for="(errorDescription, indexDescription) in errors.description"
+            :key="indexDescription"
+          >
+            <small class="p-error">{{ errorDescription }}</small>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="tags">Tags</label>
+        <Chips
+          id="tags"
+          v-model.trim="permission.tags"
+          separator=","
+          required="false"
+          placeholder="Write a tags"
+          :class="{
+            'p-invalid': errors?.tags,
+          }"
+          @blur="hideErrors('tags')"
+        />
+        <div v-for="(error, key) in errors" :key="key">
+          <div v-if="typeof key === 'string' && key.startsWith('tags')">
+            <span v-for="(errorMsg, index) in error" :key="index">
+              <small class="p-error">{{ errorMsg }}</small>
+            </span>
+          </div>
+          <div v-else>
+            <small class="p-error"></small>
           </div>
         </div>
       </div>
@@ -231,14 +310,14 @@ import { onBeforeMount, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { permissionsStore } from "@js/stores/Permissions";
 import { FilterMatchMode } from "primevue/api";
-import { Datum } from "@js/interfaces/Roles/Role";
+import { DatumPermission } from "@js/interfaces/Permissions/Permission";
 import { PermissionLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
 const store = permissionsStore();
 const dt = ref<any>();
-const permission = ref<Datum>();
-const permissions = ref<Datum[]>([]);
+const permission = ref<DatumPermission>();
+const permissions = ref<DatumPermission[]>([]);
 const loading = ref<boolean>();
 const permissionDialog = ref<boolean>(false);
 const deletePermissionDialog = ref<boolean>(false);
@@ -252,6 +331,8 @@ const filters = ref<{}>({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  description: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  tags: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const exportCSV = (event: any) => {
   dt.value.exportCSV();
@@ -260,6 +341,8 @@ const openNew = () => {
   permission.value = {
     id: 0,
     name: "",
+    description: "",
+    tags: [],
   };
   submitted.value = false;
   permissionDialog.value = true;
@@ -272,6 +355,8 @@ const hideDialog = () => {
   permission.value = {
     id: 0,
     name: "",
+    description: "",
+    tags: [],
   };
 };
 const hideErrors = (field: string) => {
@@ -318,10 +403,12 @@ const savePermission = () => {
                 lastID.value = respGetId;
                 permission.value.id = lastID.value?.nextId;
                 //console.log("ID: ", lastID.value?.nextId, "Permission: ", permission.value);
-                permissions.value.push(permission.value as Datum);
+                permissions.value.push(permission.value as DatumPermission);
                 permission.value = {
                   id: 0,
                   name: "",
+                  description: "",
+                  tags: [],
                 };
                 permissionDialog.value = false;
                 toast.add({
@@ -402,13 +489,13 @@ const savePermission = () => {
     }
   }
 };
-const editPermission = (prod: Datum) => {
+const editPermission = (prod: DatumPermission) => {
   permission.value = { ...prod };
   permissionDialog.value = true;
   submitted.value = false;
   errors.value = null;
 };
-const confirmDeletePermission = (prod: Datum) => {
+const confirmDeletePermission = (prod: DatumPermission) => {
   permission.value = prod;
   deletePermissionDialog.value = true;
 };
@@ -425,6 +512,8 @@ const deletePermission = () => {
           permission.value = {
             id: 0,
             name: "",
+            description: "",
+            tags: [],
           };
           deletePermissionDialog.value = false;
           toast.add({
@@ -469,7 +558,7 @@ const confirmDeleteSelected = () => {
 };
 const deleteSelectedPermissions = () => {
   const permissionsID = ref<{ id: number }[]>([]);
-  selectedPermissions.value.forEach((selectedPermission: Datum) => {
+  selectedPermissions.value.forEach((selectedPermission: DatumPermission) => {
     permissionsID.value.push({ id: selectedPermission.id });
   });
   store
