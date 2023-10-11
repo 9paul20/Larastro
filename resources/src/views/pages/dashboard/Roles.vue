@@ -23,7 +23,12 @@
           showGridlines
         >
           <template #paginatorstart>
-            <Button type="button" icon="pi pi-refresh" text @click="getAllRoles()" />
+            <Button
+              type="button"
+              icon="pi pi-refresh"
+              text
+              @click="getAllRoles(), getAllPermissions()"
+            />
           </template>
           <template #paginatorend>
             <!-- <Button type="button" icon="pi pi-download" text /> -->
@@ -432,12 +437,13 @@
 
 <script setup lang="ts">
 import { onBeforeMount, ref } from "vue";
+import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { rolesStore } from "@js/stores/Roles";
 import { permissionsStore } from "@js/stores/Permissions";
-import { FilterMatchMode } from "primevue/api";
-import { DatumRole } from "@js/interfaces/Roles/Role";
 import { DatumPermission } from "@js/interfaces/Permissions/Permission";
+import { PermissionCategorized } from "@js/interfaces/Permissions/PermissionCategorized";
+import { DatumRole } from "@js/interfaces/Roles/Role";
 import { RoleLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
@@ -447,6 +453,11 @@ const dt = ref<any>();
 const role = ref<DatumRole>();
 const roles = ref<DatumRole[]>([]);
 const permissions = ref<DatumPermission[]>([]);
+const categorizedPermissions = ref<PermissionCategorized>({
+  UsersPermissions: [],
+  RolesPermissions: [],
+  PermissionsPermissions: [],
+});
 const checkboxValue = ref([]);
 const loading = ref<boolean>();
 const roleDialog = ref<boolean>(false);
@@ -521,8 +532,34 @@ const getAllPermissions = () => {
     .getAllPermissions()
     .then((resp: any) => {
       permissions.value = resp.data;
-      console.log(permissions.value);
       loading.value = false;
+      // console.log(permissions.value);
+      permissions.value.forEach((permission) => {
+        permission.tags.forEach((tag) => {
+          if (tag === "User") {
+            categorizedPermissions.value.UsersPermissions.push(permission.name);
+            // console.log(tag);
+          }
+          if (tag === "Role") {
+            categorizedPermissions.value.RolesPermissions.push(permission.name);
+            // console.log(tag);
+          }
+          if (tag === "Permission") {
+            categorizedPermissions.value.PermissionsPermissions.push(permission.name);
+            // console.log(tag);
+          }
+          /* if (tag.includes("User")) {
+            categorizedPermissions.value.UsersPermissions.push(permission.name);
+          }
+          if (tag.includes("Role")) {
+            categorizedPermissions.value.RolesPermissions.push(permission.name);
+          }
+          if (tag.includes("Permission")) {
+            categorizedPermissions.value.PermissionsPermissions.push(permission.name);
+          } */
+        });
+      });
+      console.log(categorizedPermissions.value);
     })
     .catch((error: string) => {
       console.error(error);
