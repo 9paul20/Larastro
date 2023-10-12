@@ -1,5 +1,6 @@
 <template>
   <div class="grid">
+    <!-- DataTable -->
     <div class="col-12">
       <div class="card p-fluid">
         <h1>Roles</h1>
@@ -161,7 +162,7 @@
     <!-- Dialog Create Role -->
     <Dialog
       v-model:visible="roleDialog"
-      :style="{ width: '450px' }"
+      :style="{ width: '500px' }"
       header="Role Details"
       :modal="true"
       class="p-fluid"
@@ -242,144 +243,34 @@
       </div>
       <h5>Permissions</h5>
       <div class="card px-3 py-3">
-        <h5>Users</h5>
-        <div class="grid">
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption1"
-                name="option"
-                value="Create"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption1">Create</label>
-            </div>
+        <div
+          v-for="(catalogPermission, indexCatalogPermission) in catalogPermissions"
+          :key="indexCatalogPermission"
+        >
+          <div class="flex">
+            <h5>For {{ catalogPermission }}s</h5>
+            <InputSwitch
+              v-model="switchPermissions[catalogPermission + 'sSwitchPermissions']"
+              class="ml-auto custom-margin-right"
+            />
           </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption2"
-                name="option"
-                value="Read"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption2">Read</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption3"
-                name="option"
-                value="Update"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption3">Update</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption3"
-                name="option"
-                value="Delete"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption3">Delete</label>
-            </div>
-          </div>
-        </div>
-        <h5 class="my-3">Users</h5>
-        <div class="grid">
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption1"
-                name="option"
-                value="Create"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption1">Create</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption2"
-                name="option"
-                value="Read"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption2">Read</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption3"
-                name="option"
-                value="Update"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption3">Update</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption3"
-                name="option"
-                value="Delete"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption3">Delete</label>
-            </div>
-          </div>
-        </div>
-        <h5 class="my-3">Users</h5>
-        <div class="grid">
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption1"
-                name="option"
-                value="Create"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption1">Create</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption2"
-                name="option"
-                value="Read"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption2">Read</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption3"
-                name="option"
-                value="Update"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption3">Update</label>
-            </div>
-          </div>
-          <div class="col-12 md:col-3">
-            <div class="field-checkbox mb-0">
-              <Checkbox
-                id="checkOption3"
-                name="option"
-                value="Delete"
-                v-model="checkboxValue"
-              />
-              <label for="checkOption3">Delete</label>
+          <div class="grid">
+            <div
+              class="col-12 md:col-3"
+              v-for="(permission, indexPermission) in categorizedPermissions[
+                catalogPermission + 'sPermissions'
+              ]"
+              :key="indexPermission"
+            >
+              <div class="field-checkbox mb-0">
+                <Checkbox
+                  :id="permission"
+                  :name="permission"
+                  :value="permission"
+                  v-model="checkboxPermissions"
+                />
+                <label :for="permission">{{ permission }}</label>
+              </div>
             </div>
           </div>
         </div>
@@ -436,7 +327,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { rolesStore } from "@js/stores/Roles";
@@ -453,12 +344,18 @@ const dt = ref<any>();
 const role = ref<DatumRole>();
 const roles = ref<DatumRole[]>([]);
 const permissions = ref<DatumPermission[]>([]);
+const catalogPermissions = ref<string[]>(["User", "Role", "Permission"]);
 const categorizedPermissions = ref<PermissionCategorized>({
   UsersPermissions: [],
   RolesPermissions: [],
   PermissionsPermissions: [],
 });
-const checkboxValue = ref([]);
+const switchPermissions = ref({
+  UsersSwitchPermissions: false,
+  RolesSwitchPermissions: false,
+  PermissionsSwitchPermissions: false,
+});
+const checkboxPermissions = ref<string[]>([]);
 const loading = ref<boolean>();
 const roleDialog = ref<boolean>(false);
 const deleteRoleDialog = ref<boolean>(false);
@@ -475,6 +372,7 @@ const filters = ref<{}>({
   description: { value: null, matchMode: FilterMatchMode.CONTAINS },
   tags: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
+//
 const exportCSV = (event: any) => {
   dt.value.exportCSV();
 };
@@ -499,7 +397,7 @@ const hideDialog = () => {
     description: "",
     tags: [],
   };
-  checkboxValue.value = [];
+  checkboxPermissions.value = [];
 };
 const hideErrors = (field: string) => {
   if (errors.value && (field in errors.value || field + "." in errors.value)) {
@@ -513,7 +411,6 @@ const getAllRoles = () => {
     .getAllRoles()
     .then((resp: any) => {
       roles.value = resp.data;
-      // console.log(roles.value);
       loading.value = false;
     })
     .catch((error: string) => {
@@ -533,33 +430,17 @@ const getAllPermissions = () => {
     .then((resp: any) => {
       permissions.value = resp.data;
       loading.value = false;
-      // console.log(permissions.value);
       permissions.value.forEach((permission) => {
         permission.tags.forEach((tag) => {
-          if (tag === "User") {
-            categorizedPermissions.value.UsersPermissions.push(permission.name);
-            // console.log(tag);
-          }
-          if (tag === "Role") {
-            categorizedPermissions.value.RolesPermissions.push(permission.name);
-            // console.log(tag);
-          }
-          if (tag === "Permission") {
-            categorizedPermissions.value.PermissionsPermissions.push(permission.name);
-            // console.log(tag);
-          }
-          /* if (tag.includes("User")) {
-            categorizedPermissions.value.UsersPermissions.push(permission.name);
-          }
-          if (tag.includes("Role")) {
-            categorizedPermissions.value.RolesPermissions.push(permission.name);
-          }
-          if (tag.includes("Permission")) {
-            categorizedPermissions.value.PermissionsPermissions.push(permission.name);
-          } */
+          catalogPermissions.value.forEach((catalogPermission) => {
+            if (tag === catalogPermission) {
+              categorizedPermissions.value[catalogPermission + "sPermissions"].push(
+                permission.name
+              );
+            }
+          });
         });
       });
-      console.log(categorizedPermissions.value);
     })
     .catch((error: string) => {
       console.error(error);
@@ -577,12 +458,12 @@ const saveRole = () => {
   createOrUpdate.value = role.value?.id === 0 ? true : false;
 
   if (role.value?.name.trim()) {
-    // console.log(role.value);
     // Create Role
     if (createOrUpdate.value) {
       store
         .storeRole(role.value)
         .then((respStore: any) => {
+          console.log(checkboxPermissions.value);
           if (respStore && respStore.severity === "success") {
             store
               .getCurrentRoleId()
@@ -590,7 +471,6 @@ const saveRole = () => {
                 lastID.value = respGetId;
                 roleDialog.value = false;
                 role.value.id = lastID.value?.nextId;
-                // console.log("ID: ", lastID.value?.nextId, "Role: ", role.value);
                 roles.value.push(role.value as DatumRole);
                 role.value = {
                   id: 0,
@@ -643,7 +523,6 @@ const saveRole = () => {
       store
         .updateRole(role.value)
         .then((resp: any) => {
-          //console.log(resp);
           if (resp && resp.severity === "info") {
             roles.value[findIndexById(role.value.id)] = role.value;
             roleDialog.value = false;
@@ -692,7 +571,6 @@ const deleteRole = () => {
     store
       .destroyRole(role.value)
       .then((resp: any) => {
-        //console.log(resp);
         if (resp.severity === "warn") {
           roles.value = roles.value.filter((val) => val.id !== role.value?.id);
           role.value = {
@@ -750,7 +628,6 @@ const deleteSelectedRoles = () => {
   store
     .destroyRoles(rolesID.value)
     .then((resp: any) => {
-      // console.log(resp);
       if (resp.severity === "warn") {
         roles.value = roles.value.filter(
           (val) => !selectedRoles.value.includes(val as never)
@@ -796,6 +673,22 @@ onBeforeMount(() => {
   getAllRoles();
   getAllPermissions();
 });
+//
+watch(switchPermissions.value, (newValues) => {
+  const selectedPermissions = [];
+  Object.keys(newValues).forEach((key) => {
+    const value: boolean = newValues[key];
+    const permissionType = key.replace("SwitchPermissions", "Permissions");
+    const permissions = categorizedPermissions.value[permissionType];
+
+    if (value) {
+      selectedPermissions.push(...permissions);
+    }
+  });
+
+  checkboxPermissions.value = selectedPermissions;
+});
+//
 </script>
 
 <style scoped lang="scss">

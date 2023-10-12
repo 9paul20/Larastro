@@ -19,6 +19,7 @@ class RolesController extends Controller
         if (request()->wantsJson())
             try {
                 $rowDatas = Role::orderBy('id', 'asc')
+                    ->with('permissions')
                     ->paginate(
                         $perPage,
                         [
