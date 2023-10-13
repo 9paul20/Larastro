@@ -61,13 +61,7 @@
             style="width: 3rem"
             :exportable="false"
           ></Column>
-          <Column
-            field="id"
-            header="ID"
-            exportHeader="ID"
-            sortable
-            style="min-width: 12rem"
-          >
+          <Column field="id" header="ID" exportHeader="ID" sortable style="">
             <template #body="{ data }">
               {{ data.id }}
             </template>
@@ -81,7 +75,7 @@
               />
             </template>
           </Column>
-          <Column field="name" header="Name" sortable style="min-width: 12rem">
+          <Column field="name" header="Name" sortable style="">
             <template #body="{ data }">
               {{ data.name }}
             </template>
@@ -95,7 +89,7 @@
               />
             </template>
           </Column>
-          <Column field="email" header="Email" style="min-width: 12rem" sortable>
+          <Column field="email" header="Email" style="" sortable>
             <template #body="{ data }">
               {{ data.email }}
             </template>
@@ -109,7 +103,59 @@
               />
             </template>
           </Column>
-          <Column :exportable="false" style="min-width: 8rem">
+          <Column field="roles" header="Roles" sortable style="">
+            <template #body="{ data }">
+              <div
+                v-if="data.roles && data.roles.length > 0"
+                class="flex flex-wrap justify-content-center gap-2"
+              >
+                <template v-for="(role, index) in data.roles.slice(0, 4)">
+                  <Tag
+                    icon="pi pi-user"
+                    :class="{ 'p-mr-2': index !== data.roles.slice(0, 4).length - 1 }"
+                    severity="info"
+                  >
+                    {{ role.name }}
+                  </Tag>
+                </template>
+                <template v-if="data.roles.length > 4">
+                  <Tag icon="pi pi-plus" severity="info">{{ data.roles.length - 4 }}</Tag>
+                </template>
+              </div>
+              <div v-else class="flex flex-wrap justify-content-center gap-2">
+                <Tag icon="pi pi-times" severity="danger">Without Roles</Tag>
+              </div>
+            </template>
+          </Column>
+          <Column field="permissions" header="Permissions" sortable style="">
+            <template #body="{ data }">
+              <div
+                v-if="data.permissions && data.permissions.length > 0"
+                class="flex flex-wrap justify-content-center gap-2"
+              >
+                <template v-for="(permission, index) in data.permissions.slice(0, 4)">
+                  <Tag
+                    icon="pi pi-user"
+                    :class="{
+                      'p-mr-2': index !== data.permissions.slice(0, 4).length - 1,
+                    }"
+                    severity="success"
+                  >
+                    {{ permission.name }}
+                  </Tag>
+                </template>
+                <template v-if="data.permissions.length > 4">
+                  <Tag icon="pi pi-plus" severity="success">{{
+                    data.permissions.length - 4
+                  }}</Tag>
+                </template>
+              </div>
+              <div v-else class="flex flex-wrap justify-content-center gap-2">
+                <Tag icon="pi pi-times" severity="danger">Without Permissions</Tag>
+              </div>
+            </template>
+          </Column>
+          <Column :exportable="false" style="min-width: 9rem">
             <template #body="slotProps">
               <Button
                 icon="pi pi-pencil"
@@ -300,14 +346,20 @@ import { onBeforeMount, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { FilterMatchMode } from "primevue/api";
 import { usersStore } from "@js/stores/Users";
-import { DatumUser } from "@js/interfaces/Users/User";
+import { DatumUser, PermissionUser, RoleUser } from "@js/interfaces/Users/User";
 import { UserLastID } from "@js/interfaces/index";
+import { rolesStore } from "@js/stores/Roles";
+import { permissionsStore } from "@js/stores/Permissions";
 //
 const toast = useToast();
 const store = usersStore();
+const storeRoles = rolesStore();
+const storePermissions = permissionsStore();
 const dt = ref<any>();
 const user = ref<DatumUser>();
 const users = ref<DatumUser[]>([]);
+const roles = ref<RoleUser[]>([]);
+const permissions = ref<PermissionUser[]>([]);
 const loading = ref<boolean>();
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
@@ -370,6 +422,25 @@ const getAllUsers = () => {
         severity: "error",
         summary: "Error",
         detail: "Can't get users list: " + error,
+        life: 3000,
+      });
+    });
+};
+const getAllRoles = () => {
+  storeRoles
+    .getAllRoles()
+    .then((resp: any) => {
+      //console.log(resp);
+      if (resp.data) {
+        user.value.roles = resp.data;
+      }
+    })
+    .catch((error: string) => {
+      console.error(error);
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get roles list: " + error,
         life: 3000,
       });
     });

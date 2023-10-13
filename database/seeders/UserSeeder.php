@@ -17,12 +17,13 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
         ])->assignRole('Admin');
+        $UAdmin->syncPermissions(['Create Users', 'Read Users', 'Update Users', 'Delete Users', 'Create Roles', 'Read Roles', 'Update Roles', 'Delete Roles', 'Create Permissions', 'Read Permissions', 'Update Permissions', 'Delete Permissions']);
 
         $usersSeeder = User::factory(10)
-        ->create()
-        ->each(function ($user) {
-            $user->assignRole('User');
-            $user->save();
-        });
+            ->create()
+            ->each(function ($user) {
+                $user->assignRole('User');
+                $user->save();
+            });
     }
 }

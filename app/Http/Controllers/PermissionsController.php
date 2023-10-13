@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PermissionRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class PermissionsController extends Controller
 {
@@ -16,6 +18,7 @@ class PermissionsController extends Controller
     {
         // $this->authorize("view", Role::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
+
         if (request()->wantsJson())
             try {
                 $rowDatas = Permission::orderBy('id', 'asc')
@@ -31,9 +34,10 @@ class PermissionsController extends Controller
                         "permissions_page"
                     );
                 $rowDatas->transform(function ($permission) {
-                    $permission->tags = explode(', ', $permission->tags);
+                    $permission->tags = $permission->tags === "" ? [] : explode(', ', $permission->tags);
                     return $permission;
                 });
+
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -43,6 +47,7 @@ class PermissionsController extends Controller
                     "errors" => $th->getMessage()
                 ], 422);
             }
+
         return "The access for get all permissions is just for JSON request";
     }
 
@@ -57,7 +62,10 @@ class PermissionsController extends Controller
                     $tagsToString = implode(', ', $request->tags);
                     $request->merge(['tags' => $tagsToString]);
                     $permission = Permission::create($request->all());
+                } else {
+                    $role = Permission::create($request->all());
                 }
+
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -72,6 +80,7 @@ class PermissionsController extends Controller
                 ], 422);
             }
         }
+
         return "The access for store permissions is just for JSON request";
     }
 
@@ -88,7 +97,13 @@ class PermissionsController extends Controller
                     $permission = Permission::findOrFail($id);
                     $permission->updateOrFail($request->all());
                     $permission->save();
+                } elseif (empty($request->tags)) {
+                    $request->merge(['tags' => null]);
+                    $permission = Permission::findOrFail($id);
+                    $permission->updateOrFail($request->all());
+                    $permission->save();
                 }
+
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",
@@ -103,6 +118,7 @@ class PermissionsController extends Controller
                 ], 422);
             }
         }
+
         return "The access for update permissions is just for JSON request";
     }
 
@@ -114,6 +130,7 @@ class PermissionsController extends Controller
         if (request()->wantsJson()) {
             try {
                 $permission = Permission::findOrFail($id);
+
                 if (auth()->check()) {
                     $user = auth()->user();
 
@@ -127,6 +144,7 @@ class PermissionsController extends Controller
                     $rolesWithPermission = $user->getRoleNames()->filter(function ($role) use ($permission) {
                         return $role->hasPermissionTo($permission->name);
                     });
+
                     if (!$rolesWithPermission->isEmpty()) {
                         return response()->json([
                             "severity" => "error",
@@ -135,7 +153,24 @@ class PermissionsController extends Controller
                         ], 422);
                     }
                 }
+
+                $rolesWithPermission = Role::whereHas('permissions', function ($query) use ($id) {
+                    $query->where('id', $id);
+                })->count();
+                $usersWithPermission = User::whereHas('permissions', function ($query) use ($id) {
+                    $query->where('id', $id);
+                })->count();
+                if ($rolesWithPermission > 0 || $usersWithPermission > 0) {
+                    return response()->json([
+                        "severity" => "error",
+                        "summary" => "Error",
+                        "detail" => "This permission is in use and cannot be deleted.",
+                        "errors" => "Permission In Use"
+                    ], 422);
+                }
+
                 $permission->deleteOrFail();
+
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",
@@ -150,6 +185,7 @@ class PermissionsController extends Controller
                 ], 422);
             }
         }
+
         return "The access for destroy permissions is just for JSON request";
     }
 
@@ -158,6 +194,7 @@ class PermissionsController extends Controller
         if (request()->wantsJson()) {
             $permissionsID = $request->all();
             $permissionsCount = count($permissionsID);
+
             if (!$permissionsID) {
                 return response()->json([
                     'severity' => 'error',
@@ -181,6 +218,7 @@ class PermissionsController extends Controller
                 ], 422);
             }
         }
+
         return "The access for destroy many permissions is just for JSON request";
     }
 
@@ -189,6 +227,7 @@ class PermissionsController extends Controller
         if (request()->wantsJson()) {
             try {
                 $nextId = DB::table('permissions')->max('id');
+
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -204,6 +243,7 @@ class PermissionsController extends Controller
                 ], 422);
             }
         }
+
         return "The access for get next permissions id is just for JSON request";
     }
 }

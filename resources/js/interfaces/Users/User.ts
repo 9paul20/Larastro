@@ -18,10 +18,50 @@ export interface DatumUser {
     email: string;
     id: number;
     name: string;
+    permissions: PermissionUser[];
+    roles: RoleUser[];
+}
+
+export interface PermissionUser {
+    description: string;
+    guard_name: GuardName;
+    id: number;
+    name: string;
+    pivot: PermissionPivot;
+    tags: string[];
+}
+
+export enum GuardName {
+    Web = "web",
+}
+
+export interface PermissionPivot {
+    model_id: number;
+    model_type: ModelType;
+    permission_id: number;
+}
+
+export enum ModelType {
+    AppModelsUser = "App\\Models\\User",
 }
 
 export interface LinkUser {
     active: boolean;
     label: string;
     url: null | string;
+}
+
+export interface RoleUser {
+    description: string;
+    guard_name: GuardName;
+    id: number;
+    name: string;
+    pivot: RolePivot;
+    tags: string[];
+}
+
+export interface RolePivot {
+    model_id: number;
+    model_type: ModelType;
+    role_id: number;
 }

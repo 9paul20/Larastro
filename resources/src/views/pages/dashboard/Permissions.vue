@@ -66,13 +66,7 @@
             style="width: 3rem"
             :exportable="false"
           ></Column>
-          <Column
-            field="id"
-            header="ID"
-            exportHeader="ID"
-            sortable
-            style="min-width: 12rem"
-          >
+          <Column field="id" header="ID" exportHeader="ID" sortable style="">
             <template #body="{ data }">
               {{ data.id }}
             </template>
@@ -86,7 +80,7 @@
               />
             </template>
           </Column>
-          <Column field="name" header="Name" sortable style="min-width: 12rem">
+          <Column field="name" header="Name" sortable style="">
             <template #body="{ data }">
               {{ data.name }}
             </template>
@@ -100,12 +94,7 @@
               />
             </template>
           </Column>
-          <Column
-            field="description"
-            header="Description"
-            sortable
-            style="min-width: 12rem"
-          >
+          <Column field="description" header="Description" sortable style="">
             <template #body="{ data }">
               {{ data.description ? data.description : "Without Description" }}
             </template>
@@ -119,9 +108,28 @@
               />
             </template>
           </Column>
-          <Column field="tags" header="Tags" sortable style="min-width: 12rem">
+          <Column field="tags" header="Tags" sortable style="">
             <template #body="{ data }">
-              {{ data.tags ? data.tags.join(", ") : "Without Tags" }}
+              <div
+                v-if="data.tags && data.tags.length > 0"
+                class="flex flex-wrap justify-content-center gap-2"
+              >
+                <template v-for="(tag, index) in data.tags.slice(0, 4)">
+                  <Tag
+                    icon="pi pi-user"
+                    :class="{ 'p-mr-2': index !== data.tags.slice(0, 4).length - 1 }"
+                    severity="info"
+                  >
+                    {{ tag }}
+                  </Tag>
+                </template>
+                <template v-if="data.tags.length > 4">
+                  <Tag icon="pi pi-plus" severity="info">{{ data.tags.length - 4 }}</Tag>
+                </template>
+              </div>
+              <div v-else class="flex flex-wrap justify-content-center gap-2">
+                <Tag icon="pi pi-times" severity="danger">Without Tags</Tag>
+              </div>
             </template>
             <template #filter="{ filterModel, filterCallback }">
               <InputText
@@ -133,7 +141,7 @@
               />
             </template>
           </Column>
-          <Column :exportable="false" style="min-width: 8rem">
+          <Column :exportable="false" style="min-width: 9rem">
             <template #body="slotProps">
               <Button
                 icon="pi pi-pencil"

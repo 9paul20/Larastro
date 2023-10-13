@@ -40,10 +40,17 @@ class UserRequest extends FormRequest
             'name.min' => 'Please Provide Your Name With Minimum 4 Characters, Thank You.',
             'name.max' => 'Please Provide Your Name With Maximum 255 Characters, Thank You.',
             'email.required' => 'Please Provide Your Email Address For Better Communication, Thank You.',
+            'email.email' => 'Please Provide Your Email Address In Valid Format, Thank You.',
             'email.unique' => 'Sorry, This Email Address Is Already Used By Another User. Please Try With Different One, Thank You.',
+            'password.required' => 'Please Provide Your Password For Better Security, Thank You.',
+            'password.string' => 'Password Should Be String, Thank You.',
             'password.min' => 'Password Length Should Be More Than 4 Character Or Digit Or Mix, Thank You.',
             'password.max' => 'Password Length Should Be Less Than 255 Character Or Digit Or Mix, Thank You.',
             'password.regex' => 'Password Should Be Mix Of Character And Digit, Thank You.',
+            'password_confirmation.required' => 'Please Provide Your Confirm Password For Better Security, Thank You.',
+            'password_confirmation.string' => 'Confirm Password Should Be String, Thank You.',
+            'password_confirmation.min' => 'Confirm Password Length Should Be More Than 4 Character Or Digit Or Mix, Thank You.',
+            'password_confirmation.max' => 'Confirm Password Length Should Be Less Than 255 Character Or Digit Or Mix, Thank You.',
             'password_confirmation.same' => 'Password And Confirm Password Should Be Same, Thank You.',
         ];
     }

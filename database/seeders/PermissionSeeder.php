@@ -15,75 +15,75 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         //Users
-        $CUser = Permission::create([
-            'name' => 'Create User',
+        $CUsers = Permission::create([
+            'name' => 'Create Users',
             'description' => 'Allows user to create new users',
             'tags' => 'Create, Users, User'
         ]);
 
-        $RUser = Permission::create([
-            'name' => 'Read User',
+        $RUsers = Permission::create([
+            'name' => 'Read Users',
             'description' => 'Allows user to view user details',
             'tags' => 'Read, Users, User'
         ]);
 
-        $UUser = Permission::create([
-            'name' => 'Update User',
+        $UUsers = Permission::create([
+            'name' => 'Update Users',
             'description' => 'Allows user to edit user information',
             'tags' => 'Update, Users, User'
         ]);
 
-        $DUser = Permission::create([
-            'name' => 'Delete User',
+        $DUsers = Permission::create([
+            'name' => 'Delete Users',
             'description' => 'Allows user to delete users',
             'tags' => 'Delete, Users, User'
         ]);
 
         //Roles
-        $CRole = Permission::create([
+        $CRoles = Permission::create([
             'name' => 'Create Roles',
             'description' => 'Allows user to create new roles',
             'tags' => 'Create, Roles, Role'
         ]);
 
-        $RRole = Permission::create([
+        $RRoles = Permission::create([
             'name' => 'Read Roles',
             'description' => 'Allows user to view role details',
             'tags' => 'Read, Roles, Role'
         ]);
 
-        $URole = Permission::create([
+        $URoles = Permission::create([
             'name' => 'Update Roles',
             'description' => 'Allows user to edit role information',
             'tags' => 'Update, Roles, Role'
         ]);
 
-        $DRole = Permission::create([
+        $DRoles = Permission::create([
             'name' => 'Delete Roles',
             'description' => 'Allows user to delete roles',
             'tags' => 'Delete, Roles, Role'
         ]);
 
         //Permissions
-        $CPermission = Permission::create([
+        $CPermissions = Permission::create([
             'name' => 'Create Permissions',
             'description' => 'Allows user to create new permissions',
             'tags' => 'Create, Permissions, Permission'
         ]);
 
-        $RPermission = Permission::create([
+        $RPermissions = Permission::create([
             'name' => 'Read Permissions',
             'description' => 'Allows user to view permission details',
             'tags' => 'Read, Permissions, Permission'
         ]);
 
-        $UPermission = Permission::create([
+        $UPermissions = Permission::create([
             'name' => 'Update Permissions',
             'description' => 'Allows user to edit permission information',
             'tags' => 'Update, Permissions, Permission'
         ]);
 
-        $DPermission = Permission::create([
+        $DPermissions = Permission::create([
             'name' => 'Delete Permissions',
             'description' => 'Allows user to delete permissions',
             'tags' => 'Delete, Permissions, Permission'
@@ -94,18 +94,18 @@ class PermissionSeeder extends Seeder
         $RAdmin = Role::findByName('Admin')->first();
         if ($RAdmin) {
             $RAdmin->syncPermissions([
-                $CUser,
-                $RUser,
-                $UUser,
-                $DUser,
-                $CRole,
-                $RRole,
-                $URole,
-                $DRole,
-                $CPermission,
-                $RPermission,
-                $UPermission,
-                $DPermission
+                $CUsers,
+                $RUsers,
+                $UUsers,
+                $DUsers,
+                $CRoles,
+                $RRoles,
+                $URoles,
+                $DRoles,
+                $CPermissions,
+                $RPermissions,
+                $UPermissions,
+                $DPermissions
             ]);
         }
         // if ($RAdmin) {

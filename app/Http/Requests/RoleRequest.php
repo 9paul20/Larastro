@@ -27,7 +27,9 @@ class RoleRequest extends FormRequest
         return [
             'name' => 'required|string|min:4|max:255|unique:roles,name,' . $id . ',id',
             'description' => 'nullable|string|min:4|max:255',
-            'tags' => 'nullable|array|min:1|max:255',
+            'permissions' => 'nullable|array|max:255',
+            'permissions.*.name' => 'nullable|string|distinct|min:4|max:255',
+            'tags' => 'nullable|array|max:255',
             'tags.*' => 'nullable|string|distinct|min:4|max:255',
         ];
     }
@@ -43,8 +45,14 @@ class RoleRequest extends FormRequest
             'description.string' => 'Please Provide Your Description As String, Thank You.',
             'description.min' => 'Please Provide Your Description With Minimum 4 Characters, Thank You.',
             'description.max' => 'Please Provide Your Description With Maximum 255 Characters, Thank You.',
+            'permissions.array' => 'Please Provide Your Permissions As Array, Thank You.',
+            'permissions.max' => 'Please Provide Your Permissions With Maximum 255 Permissions, Thank You.',
+            'permissions.*.name.string' => 'Please Provide Your Permissions As String, Thank You.',
+            'permissions.*.name.distinct' => 'Please Provide Your Permissions Without Duplicates, Thank You.',
+            'permissions.*.name.min' => 'Please Provide Your Permissions With Minimum 4 Characters, Thank You.',
+            'permissions.*.name.max' => 'Please Provide Your Permissions With Maximum 255 Characters, Thank You.',
             'tags.array' => 'Please Provide Your Tags As Array, Thank You.',
-            'tags.min' => 'Please Provide Your Tags With Minimum 1 Tag, Thank You.',
+            'tags.min' => 'Please Provide Your Tags With Minimum 0 Tag, Thank You.',
             'tags.max' => 'Please Provide Your Tags With Maximum 255 Tags, Thank You.',
             'tags.*.string' => 'Please Provide Your Tags As String, Thank You.',
             'tags.*.distinct' => 'Please Provide Your Tags Without Duplicates, Thank You.',

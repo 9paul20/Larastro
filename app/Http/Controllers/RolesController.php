@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RoleRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class RolesController extends Controller
         if (request()->wantsJson())
             try {
                 $rowDatas = Role::orderBy('id', 'asc')
+                    ->with('permissions:id,name,guard_name,description,tags')
                     ->paginate(
                         $perPage,
                         [
@@ -31,10 +33,11 @@ class RolesController extends Controller
                         "roles_page"
                     );
                 $rowDatas->transform(function ($role) {
-                    $role->tags = explode(', ', $role->tags);
-                    $role->permissions = $this->getRolePermissions($role->id);
+                    $role->tags = $role->tags === "" ? [] : explode(', ', $role->tags);
+                    // $role->permissions = $this->getRolePermissions($role->id);
                     return $role;
                 });
+
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -44,13 +47,14 @@ class RolesController extends Controller
                     "errors" => $th->getMessage()
                 ], 422);
             }
+
         return "The access for get all roles is just for JSON request";
     }
 
     /**
      * Display the specified resource.
      */
-    public function getRolePermissions($roleId)
+    /* public function getRolePermissions($roleId)
     {
         if (request()->wantsJson()) {
             try {
@@ -69,7 +73,7 @@ class RolesController extends Controller
             }
         }
         return "The access for get permissions for the role is just for JSON request";
-    }
+    } */
 
     /**
      * Store a newly created resource in storage.
@@ -78,11 +82,17 @@ class RolesController extends Controller
     {
         if (request()->wantsJson()) {
             try {
+                $permissions = $request->input('permissions', []);
                 if ($request->has('tags') && is_array($request->tags)) {
                     $tagsToString = implode(', ', $request->tags);
                     $request->merge(['tags' => $tagsToString]);
                     $role = Role::create($request->all());
+                } else {
+                    $role = Role::create($request->all());
                 }
+
+                $role->syncPermissions(array_column($permissions, 'name'));
+
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -97,6 +107,7 @@ class RolesController extends Controller
                 ], 422);
             }
         }
+
         return "The access for store roles is just for JSON request";
     }
 
@@ -107,13 +118,24 @@ class RolesController extends Controller
     {
         if (request()->wantsJson()) {
             try {
+                $permissions = $request->input('permissions', []);
                 if ($request->has('tags')) {
                     $tagsToString = implode(', ', $request->tags);
                     $request->merge(['tags' => $tagsToString]);
                     $role = Role::findOrFail($id);
                     $role->updateOrFail($request->all());
                     $role->save();
+                } elseif (empty($request->tags)) {
+                    $request->merge(['tags' => null]);
+                    $role = Role::findOrFail($id);
+                    $role->updateOrFail($request->all());
+                    $role->save();
                 }
+                if (empty($permissions))
+                    $role->permissions()->detach();
+                else
+                    $role->syncPermissions(array_column($permissions, 'name'));
+
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",
@@ -128,6 +150,7 @@ class RolesController extends Controller
                 ], 422);
             }
         }
+
         return "The access for update roles is just for JSON request";
     }
 
@@ -148,7 +171,22 @@ class RolesController extends Controller
                             "detail" => $role->name . ", You cannot delete a user with the same role."
                         ], 422);
                 }
+
+                $usersWithRoles = User::whereHas('roles', function ($query) use ($id) {
+                    $query->where('id', $id);
+                })->count();
+                if ($usersWithRoles > 0) {
+                    return response()->json([
+                        "severity" => "error",
+                        "summary" => "Error",
+                        "detail" => "This role is in use and cannot be deleted.",
+                        "errors" => "Role in Use"
+                    ], 422);
+                }
+
+                $role->syncPermissions([]);
                 $role->deleteOrFail();
+
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",
@@ -163,6 +201,7 @@ class RolesController extends Controller
                 ], 422);
             }
         }
+
         return "The access for destroy roles is just for JSON request";
     }
 
@@ -178,7 +217,11 @@ class RolesController extends Controller
                     'detail' => 'List of roles is null o undefined.'
                 ], 400);
             }
+
             try {
+                Role::whereIn('id', $rolesID)->each(function ($role) {
+                    $role->syncPermissions([]);
+                });
                 Role::whereIn('id', $rolesID)->delete();
                 return response()->json([
                     "severity" => "warn",
@@ -194,6 +237,7 @@ class RolesController extends Controller
                 ], 422);
             }
         }
+
         return "The access for destroy many roles is just for JSON request";
     }
 
@@ -202,6 +246,7 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             try {
                 $nextId = DB::table('roles')->max('id');
+
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -217,6 +262,7 @@ class RolesController extends Controller
                 ], 422);
             }
         }
+
         return "The access for get next roles id is just for JSON request";
     }
 }

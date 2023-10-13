@@ -19,7 +19,10 @@ class UsersController extends Controller
         if (request()->wantsJson())
             try {
                 $rowDatas = User::orderBy('id', 'asc')
-                    // ->with(['roles.permissions'])
+                    ->with([
+                        'roles:id,name,guard_name,description,tags',
+                        'permissions:id,name,guard_name,description,tags'
+                    ])
                     ->paginate(
                         $perPage,
                         [
@@ -30,8 +33,9 @@ class UsersController extends Controller
                         "users_page"
                     );
                 $rowDatas->transform(function ($user) {
-                    $user->roles = $this->getUserRoles($user->id);
-                    $user->permissions = $this->getUserPermissions($user->id);
+                    $user->roles = $user->roles === "" ? [] : explode(', ', $user->roles);
+                    // $user->roles = $this->getUserRoles($user->id);
+                    // $user->permissions = $this->getUserPermissions($user->id);
                     return $user;
                 });
                 return response()->json($rowDatas, 200);
@@ -49,7 +53,7 @@ class UsersController extends Controller
     /**
      * Display the specified resource.
      */
-    public function getUserRoles($userId)
+    /* public function getUserRoles($userId)
     {
         if (request()->wantsJson()) {
             try {
@@ -68,12 +72,12 @@ class UsersController extends Controller
             }
         }
         return "The access for get roles for the user is just for JSON request";
-    }
+    } */
 
     /**
      * Display the specified resource.
      */
-    public function getUserPermissions($userId)
+    /* public function getUserPermissions($userId)
     {
         if (request()->wantsJson()) {
             try {
@@ -92,7 +96,7 @@ class UsersController extends Controller
             }
         }
         return "The access for get permissions for the user is just for JSON request";
-    }
+    } */
 
     /**
      * Store a newly created resource in storage.

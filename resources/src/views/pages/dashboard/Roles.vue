@@ -67,13 +67,7 @@
             style="width: 3rem"
             :exportable="false"
           ></Column>
-          <Column
-            field="id"
-            header="ID"
-            exportHeader="ID"
-            sortable
-            style="min-width: 12rem"
-          >
+          <Column field="id" header="ID" exportHeader="ID" sortable style="">
             <template #body="{ data }">
               {{ data.id }}
             </template>
@@ -87,7 +81,7 @@
               />
             </template>
           </Column>
-          <Column field="name" header="Name" sortable style="min-width: 12rem">
+          <Column field="name" header="Name" sortable style="">
             <template #body="{ data }">
               {{ data.name }}
             </template>
@@ -101,12 +95,7 @@
               />
             </template>
           </Column>
-          <Column
-            field="description"
-            header="Description"
-            sortable
-            style="min-width: 12rem"
-          >
+          <Column field="description" header="Description" sortable style="">
             <template #body="{ data }">
               {{ data.description ? data.description : "Without Description" }}
             </template>
@@ -120,9 +109,28 @@
               />
             </template>
           </Column>
-          <Column field="tags" header="Tags" sortable style="min-width: 12rem">
+          <Column field="tags" header="Tags" sortable style="">
             <template #body="{ data }">
-              {{ data.tags ? data.tags.join(", ") : "Without Tags" }}
+              <div
+                v-if="data.tags && data.tags.length > 0"
+                class="flex flex-wrap justify-content-center gap-2"
+              >
+                <template v-for="(tag, index) in data.tags.slice(0, 4)">
+                  <Tag
+                    icon="pi pi-user"
+                    :class="{ 'p-mr-2': index !== data.tags.slice(0, 4).length - 1 }"
+                    severity="info"
+                  >
+                    {{ tag }}
+                  </Tag>
+                </template>
+                <template v-if="data.tags.length > 4">
+                  <Tag icon="pi pi-plus" severity="info">{{ data.tags.length - 4 }}</Tag>
+                </template>
+              </div>
+              <div v-else class="flex flex-wrap justify-content-center gap-2">
+                <Tag icon="pi pi-times" severity="danger">Without Tags</Tag>
+              </div>
             </template>
             <template #filter="{ filterModel, filterCallback }">
               <InputText
@@ -134,7 +142,35 @@
               />
             </template>
           </Column>
-          <Column :exportable="false" style="min-width: 8rem">
+          <Column field="permissions" header="Permissions" sortable style="">
+            <template #body="{ data }">
+              <div
+                v-if="data.permissions && data.permissions.length > 0"
+                class="flex flex-wrap justify-content-center gap-2"
+              >
+                <template v-for="(permission, index) in data.permissions.slice(0, 4)">
+                  <Tag
+                    icon="pi pi-check"
+                    :class="{
+                      'p-mr-2': index !== data.permissions.slice(0, 4).length - 1,
+                    }"
+                    severity="success"
+                  >
+                    {{ permission.name }}
+                  </Tag>
+                </template>
+                <template v-if="data.permissions.length > 4">
+                  <Tag icon="pi pi-plus" severity="success">{{
+                    data.permissions.length - 4
+                  }}</Tag>
+                </template>
+              </div>
+              <div v-else class="flex flex-wrap justify-content-center gap-2">
+                <Tag icon="pi pi-times" severity="danger">Without Permissions</Tag>
+              </div>
+            </template>
+          </Column>
+          <Column :exportable="false" style="min-width: 9rem">
             <template #body="slotProps">
               <Button
                 icon="pi pi-pencil"
@@ -332,8 +368,6 @@ import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { rolesStore } from "@js/stores/Roles";
 import { permissionsStore } from "@js/stores/Permissions";
-// import { DatumPermission } from "@js/interfaces/Permissions/Permission";
-import { PermissionCategorized } from "@js/interfaces/Permissions/PermissionCategorized";
 import { DatumRole, PermissionRole } from "@js/interfaces/Roles/Role";
 import { RoleLastID } from "@js/interfaces/index";
 //
@@ -345,17 +379,13 @@ const role = ref<DatumRole>();
 const roles = ref<DatumRole[]>([]);
 const permissions = ref<PermissionRole[]>([]);
 const catalogPermissions = ref<string[]>(["User", "Role", "Permission"]);
-const categorizedPermissions = ref<PermissionCategorized>({
-  UsersPermissions: [],
-  RolesPermissions: [],
-  PermissionsPermissions: [],
+const categorizedPermissions = ref<Record<string, string[]>>({});
+const switchPermissions = ref<Record<string, boolean>>({});
+catalogPermissions.value.forEach((catalogPermission) => {
+  categorizedPermissions.value[catalogPermission + "sPermissions"] = [];
+  switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
 });
-const switchPermissions = ref({
-  UsersSwitchPermissions: false,
-  RolesSwitchPermissions: false,
-  PermissionsSwitchPermissions: false,
-});
-const checkboxPermissions = ref<PermissionRole[]>([]);
+const checkboxPermissions = ref<string[]>([]);
 const loading = ref<boolean>();
 const roleDialog = ref<boolean>(false);
 const deleteRoleDialog = ref<boolean>(false);
@@ -370,6 +400,7 @@ const filters = ref<{}>({
   id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   description: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  permissions: { value: null, matchMode: FilterMatchMode.CONTAINS },
   tags: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 //
@@ -381,9 +412,13 @@ const openNew = () => {
     id: 0,
     name: "",
     description: "",
+    permissions: [],
     tags: [],
   };
   checkboxPermissions.value = [];
+  catalogPermissions.value.forEach((catalogPermission) => {
+    switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+  });
   submitted.value = false;
   roleDialog.value = true;
   errors.value = null;
@@ -396,9 +431,13 @@ const hideDialog = () => {
     id: 0,
     name: "",
     description: "",
+    permissions: [],
     tags: [],
   };
   checkboxPermissions.value = [];
+  catalogPermissions.value.forEach((catalogPermission) => {
+    switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+  });
 };
 const hideErrors = (field: string) => {
   if (errors.value && (field in errors.value || field + "." in errors.value)) {
@@ -413,6 +452,7 @@ const getAllRoles = () => {
     .then((resp: any) => {
       roles.value = resp.data;
       loading.value = false;
+      console.log(roles.value);
     })
     .catch((error: string) => {
       console.error(error);
@@ -459,12 +499,22 @@ const saveRole = () => {
   createOrUpdate.value = role.value?.id === 0 ? true : false;
 
   if (role.value?.name.trim()) {
+    if (checkboxPermissions.value.length > 0) {
+      role.value.permissions = checkboxPermissions.value.map((permissionName) => {
+        return {
+          name: permissionName,
+        };
+      });
+    } else {
+      role.value.permissions = [];
+    }
+    // console.log(role.value);
     // Create Role
     if (createOrUpdate.value) {
       store
         .storeRole(role.value)
         .then((respStore: any) => {
-          console.log(checkboxPermissions.value);
+          // console.log(checkboxPermissions.value);
           if (respStore && respStore.severity === "success") {
             store
               .getCurrentRoleId()
@@ -477,8 +527,15 @@ const saveRole = () => {
                   id: 0,
                   name: "",
                   description: "",
+                  permissions: [],
                   tags: [],
                 };
+                checkboxPermissions.value = [];
+                catalogPermissions.value.forEach((catalogPermission) => {
+                  switchPermissions.value[
+                    catalogPermission + "sSwitchPermissions"
+                  ] = false;
+                });
                 toast.add({
                   severity: respStore.severity,
                   summary: respStore.summary,
@@ -527,6 +584,17 @@ const saveRole = () => {
           if (resp && resp.severity === "info") {
             roles.value[findIndexById(role.value.id)] = role.value;
             roleDialog.value = false;
+            role.value = {
+              id: 0,
+              name: "",
+              description: "",
+              permissions: [],
+              tags: [],
+            };
+            checkboxPermissions.value = [];
+            catalogPermissions.value.forEach((catalogPermission) => {
+              switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+            });
             toast.add({
               severity: resp.severity,
               summary: resp.summary,
@@ -559,6 +627,7 @@ const saveRole = () => {
 };
 const editRole = (prod: DatumRole) => {
   role.value = { ...prod };
+  // console.log(role.value);
   role.value.permissions.forEach((permission) => {
     checkboxPermissions.value.push(permission.name);
   });
@@ -581,6 +650,7 @@ const deleteRole = () => {
             id: 0,
             name: "",
             description: "",
+            permissions: [],
             tags: [],
           };
           deleteRoleDialog.value = false;
@@ -679,7 +749,7 @@ onBeforeMount(() => {
 });
 //
 watch(switchPermissions.value, (newValues) => {
-  const selectedPermissions = [];
+  const selectedPermissions = <string[]>[];
   Object.keys(newValues).forEach((key) => {
     const value: boolean = newValues[key];
     const permissionType = key.replace("SwitchPermissions", "Permissions");
@@ -691,7 +761,6 @@ watch(switchPermissions.value, (newValues) => {
   });
 
   checkboxPermissions.value = selectedPermissions;
-  console.log(checkboxPermissions.value);
 });
 //
 </script>
