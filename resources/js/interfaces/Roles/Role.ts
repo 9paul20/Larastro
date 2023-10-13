@@ -16,14 +16,29 @@ export interface Role {
 
 export interface DatumRole {
     description: string;
-    guard_name: string;
+    guard_name: GuardNameRole;
     id: number;
     name: string;
+    permissions: PermissionRole[];
     tags: string[];
 }
 
 export enum GuardNameRole {
     Web = "web",
+}
+
+export interface PermissionRole {
+    description: string;
+    guard_name: GuardNameRole;
+    id: number;
+    name: string;
+    pivot: PivotRole;
+    tags: string;
+}
+
+export interface PivotRole {
+    permission_id: number;
+    role_id: number;
 }
 
 export interface LinkRole {

@@ -332,9 +332,9 @@ import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { rolesStore } from "@js/stores/Roles";
 import { permissionsStore } from "@js/stores/Permissions";
-import { DatumPermission } from "@js/interfaces/Permissions/Permission";
+// import { DatumPermission } from "@js/interfaces/Permissions/Permission";
 import { PermissionCategorized } from "@js/interfaces/Permissions/PermissionCategorized";
-import { DatumRole } from "@js/interfaces/Roles/Role";
+import { DatumRole, PermissionRole } from "@js/interfaces/Roles/Role";
 import { RoleLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
@@ -343,7 +343,7 @@ const storePermissions = permissionsStore();
 const dt = ref<any>();
 const role = ref<DatumRole>();
 const roles = ref<DatumRole[]>([]);
-const permissions = ref<DatumPermission[]>([]);
+const permissions = ref<PermissionRole[]>([]);
 const catalogPermissions = ref<string[]>(["User", "Role", "Permission"]);
 const categorizedPermissions = ref<PermissionCategorized>({
   UsersPermissions: [],
@@ -355,7 +355,7 @@ const switchPermissions = ref({
   RolesSwitchPermissions: false,
   PermissionsSwitchPermissions: false,
 });
-const checkboxPermissions = ref<string[]>([]);
+const checkboxPermissions = ref<PermissionRole[]>([]);
 const loading = ref<boolean>();
 const roleDialog = ref<boolean>(false);
 const deleteRoleDialog = ref<boolean>(false);
@@ -383,6 +383,7 @@ const openNew = () => {
     description: "",
     tags: [],
   };
+  checkboxPermissions.value = [];
   submitted.value = false;
   roleDialog.value = true;
   errors.value = null;
@@ -558,6 +559,9 @@ const saveRole = () => {
 };
 const editRole = (prod: DatumRole) => {
   role.value = { ...prod };
+  role.value.permissions.forEach((permission) => {
+    checkboxPermissions.value.push(permission.name);
+  });
   roleDialog.value = true;
   submitted.value = false;
   errors.value = null;
@@ -687,6 +691,7 @@ watch(switchPermissions.value, (newValues) => {
   });
 
   checkboxPermissions.value = selectedPermissions;
+  console.log(checkboxPermissions.value);
 });
 //
 </script>

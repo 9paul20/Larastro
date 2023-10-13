@@ -90,7 +90,8 @@ class PermissionSeeder extends Seeder
         ]);
 
         //Sync Permissions with Role Admin
-        $RAdmin = Role::where('name', 'Admin')->first();
+        // $RAdmin = Role::where('name', 'Admin')->first();
+        $RAdmin = Role::findByName('Admin')->first();
         if ($RAdmin) {
             $RAdmin->syncPermissions([
                 $CUser,
@@ -107,5 +108,21 @@ class PermissionSeeder extends Seeder
                 $DPermission
             ]);
         }
+        // if ($RAdmin) {
+        //     $RAdmin->givePermissionTo([
+        //         $CUser,
+        //         $RUser,
+        //         $UUser,
+        //         $DUser,
+        //         $CRole,
+        //         $RRole,
+        //         $URole,
+        //         $DRole,
+        //         $CPermission,
+        //         $RPermission,
+        //         $UPermission,
+        //         $DPermission
+        //     ]);
+        // }
     }
 }

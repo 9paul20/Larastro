@@ -19,7 +19,6 @@ class RolesController extends Controller
         if (request()->wantsJson())
             try {
                 $rowDatas = Role::orderBy('id', 'asc')
-                    ->with('permissions')
                     ->paginate(
                         $perPage,
                         [
@@ -33,6 +32,7 @@ class RolesController extends Controller
                     );
                 $rowDatas->transform(function ($role) {
                     $role->tags = explode(', ', $role->tags);
+                    $role->permissions = $this->getRolePermissions($role->id);
                     return $role;
                 });
                 return response()->json($rowDatas, 200);
@@ -45,6 +45,30 @@ class RolesController extends Controller
                 ], 422);
             }
         return "The access for get all roles is just for JSON request";
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function getRolePermissions($roleId)
+    {
+        if (request()->wantsJson()) {
+            try {
+                $role = Role::findOrFail($roleId);
+                $permissions = $role->permissions()
+                    ->select('id', 'name', 'guard_name', 'description', 'tags')
+                    ->get();
+                return $permissions;
+            } catch (\Throwable $th) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "Error in get Permissions for the Role",
+                    "errors" => $th->getMessage()
+                ], 422);
+            }
+        }
+        return "The access for get permissions for the role is just for JSON request";
     }
 
     /**
