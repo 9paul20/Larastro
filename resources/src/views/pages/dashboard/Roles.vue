@@ -455,7 +455,6 @@ const getAllRoles = () => {
     .then((resp: any) => {
       roles.value = resp.data;
       loading.value = false;
-      // console.log(roles.value);
     })
     .catch((error: string) => {
       console.error(error);
@@ -511,14 +510,12 @@ const saveRole = () => {
     } else {
       role.value.permissions = [];
     }
-    // console.log(role.value);
 
     // Create Role
     if (createOrUpdate.value) {
       store
         .storeRole(role.value)
         .then((respStore: any) => {
-          // console.log(checkboxPermissions.value);
           if (respStore && respStore.severity === "success") {
             store
               .getCurrentRoleId()
@@ -631,7 +628,6 @@ const saveRole = () => {
 };
 const editRole = (prod: DatumRole) => {
   role.value = { ...prod };
-  // console.log(role.value);
   role.value.permissions.forEach((permission) => {
     checkboxPermissions.value.push(permission.name);
   });

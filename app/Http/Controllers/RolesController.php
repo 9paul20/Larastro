@@ -53,30 +53,6 @@ class RolesController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    /* public function getRolePermissions($roleId)
-    {
-        if (request()->wantsJson()) {
-            try {
-                $role = Role::findOrFail($roleId);
-                $permissions = $role->permissions()
-                    ->select('id', 'name', 'guard_name', 'description', 'tags')
-                    ->get();
-                return $permissions;
-            } catch (\Throwable $th) {
-                return response()->json([
-                    "severity" => "error",
-                    "summary" => "Error",
-                    "detail" => "Error in get Permissions for the Role",
-                    "errors" => $th->getMessage()
-                ], 422);
-            }
-        }
-        return "The access for get permissions for the role is just for JSON request";
-    } */
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(RoleRequest $request)

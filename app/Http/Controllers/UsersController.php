@@ -32,12 +32,6 @@ class UsersController extends Controller
                         ],
                         "users_page"
                     );
-                // $rowDatas->transform(function ($user) {
-                //     $user->roles = $user->roles === "" ? [] : explode(', ', $user->roles);
-                //     $user->roles = $this->getUserRoles($user->id);
-                //     $user->permissions = $this->getUserPermissions($user->id);
-                //     return $user;
-                // });
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -51,57 +45,8 @@ class UsersController extends Controller
         return "The access for get all users is just for JSON request";
     }
 
-    /**
-     * Display the specified resource.
-     */
-    /* public function getUserRoles($userId)
-    {
-        if (request()->wantsJson()) {
-            try {
-                $user = User::findOrFail($userId);
-                $roles = $user->roles()
-                    ->select('id', 'name', 'guard_name', 'description', 'tags')
-                    ->get();
-                return $roles;
-            } catch (\Throwable $th) {
-                return response()->json([
-                    "severity" => "error",
-                    "summary" => "Error",
-                    "detail" => "Error in get Roles for the User",
-                    "errors" => $th->getMessage()
-                ], 422);
-            }
-        }
-        return "The access for get roles for the user is just for JSON request";
-    } */
 
-    /**
-     * Display the specified resource.
-     */
-    /* public function getUserPermissions($userId)
-    {
-        if (request()->wantsJson()) {
-            try {
-                $user = User::findOrFail($userId);
-                $roles = $user->permissions()
-                    ->select('id', 'name', 'guard_name', 'description', 'tags')
-                    ->get();
-                return $roles;
-            } catch (\Throwable $th) {
-                return response()->json([
-                    "severity" => "error",
-                    "summary" => "Error",
-                    "detail" => "Error in get Permissions for the User",
-                    "errors" => $th->getMessage()
-                ], 422);
-            }
-        }
-        return "The access for get permissions for the user is just for JSON request";
-    } */
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(UserRequest $request)
     {
         if (request()->wantsJson()) {

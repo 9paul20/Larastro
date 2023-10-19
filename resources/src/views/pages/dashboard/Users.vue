@@ -549,7 +549,6 @@ const getAllPermissions = () => {
             });
           });
         });
-        // console.log("PERMISOS SON:", permissions.value);
       }
     })
     .catch((error: string) => {
@@ -585,7 +584,6 @@ const saveUser = () => {
     } else {
       user.value.roles = [];
     }
-    // return console.log(user.value);
 
     // Create User
     if (passwordRequired.value) {
@@ -600,7 +598,6 @@ const saveUser = () => {
                 .then((respGetId: any) => {
                   lastID.value = respGetId;
                   user.value.id = lastID.value?.nextId;
-                  //console.log("ID: ", lastID.value?.nextId, "User: ", user.value);
                   users.value.push(user.value as DatumUser);
                   user.value = {
                     id: 0,
@@ -611,6 +608,13 @@ const saveUser = () => {
                     permissions: [],
                     roles: [],
                   };
+                  checkboxPermissions.value = [];
+                  checkboxRoles.value = [];
+                  catalogPermissions.value.forEach((catalogPermission) => {
+                    switchPermissions.value[
+                      catalogPermission + "sSwitchPermissions"
+                    ] = false;
+                  });
                   userDialog.value = false;
                   toast.add({
                     severity: respStore.severity,
@@ -658,10 +662,23 @@ const saveUser = () => {
       store
         .updateUser(user.value)
         .then((resp: any) => {
-          //console.log(resp);
           if (resp && resp.severity === "info") {
             users.value[findIndexById(user.value.id)] = user.value;
             userDialog.value = false;
+            user.value = {
+              id: 0,
+              name: "",
+              email: "",
+              password: "",
+              password_confirmation: "",
+              permissions: [],
+              roles: [],
+            };
+            checkboxPermissions.value = [];
+            checkboxRoles.value = [];
+            catalogPermissions.value.forEach((catalogPermission) => {
+              switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+            });
             toast.add({
               severity: resp.severity,
               summary: resp.summary,
@@ -713,7 +730,6 @@ const deleteUser = () => {
     store
       .destroyUser(user.value)
       .then((resp: any) => {
-        //console.log(resp);
         if (resp.severity === "warn") {
           users.value = users.value.filter((val) => val.id !== user.value?.id);
           user.value = {
@@ -774,7 +790,6 @@ const deleteSelectedUsers = () => {
   store
     .destroyUsers(usersID.value)
     .then((resp: any) => {
-      // console.log(resp);
       if (resp.severity === "warn") {
         users.value = users.value.filter(
           (val) => !selectedUsers.value.includes(val as never)

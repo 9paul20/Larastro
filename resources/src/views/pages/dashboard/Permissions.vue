@@ -382,7 +382,6 @@ const getAllPermissions = () => {
     .getAllPermissions()
     .then((resp: any) => {
       permissions.value = resp.data;
-      //   console.log(permissions.value);
       loading.value = false;
     })
     .catch((error: string) => {
@@ -406,14 +405,12 @@ const savePermission = () => {
       store
         .storePermission(permission.value)
         .then((respStore: any) => {
-          //console.log(respStore);
           if (respStore && respStore.severity === "success") {
             store
               .getCurrentPermissionId()
               .then((respGetId: any) => {
                 lastID.value = respGetId;
                 permission.value.id = lastID.value?.nextId;
-                //console.log("ID: ", lastID.value?.nextId, "Permission: ", permission.value);
                 permissions.value.push(permission.value as DatumPermission);
                 permission.value = {
                   id: 0,
@@ -466,10 +463,15 @@ const savePermission = () => {
       store
         .updatePermission(permission.value)
         .then((resp: any) => {
-          //console.log(resp);
           if (resp && resp.severity === "info") {
             permissions.value[findIndexById(permission.value.id)] = permission.value;
             permissionDialog.value = false;
+            permission.value = {
+              id: 0,
+              name: "",
+              description: "",
+              tags: [],
+            };
             toast.add({
               severity: resp.severity,
               summary: resp.summary,
@@ -515,7 +517,6 @@ const deletePermission = () => {
     store
       .destroyPermission(permission.value)
       .then((resp: any) => {
-        //console.log(resp);
         if (resp.severity === "warn") {
           permissions.value = permissions.value.filter(
             (val) => val.id !== permission.value?.id
@@ -575,7 +576,6 @@ const deleteSelectedPermissions = () => {
   store
     .destroyPermissions(permissionsID.value)
     .then((resp: any) => {
-      // console.log(resp);
       if (resp.severity === "warn") {
         permissions.value = permissions.value.filter(
           (val) => !selectedPermissions.value.includes(val as never)
