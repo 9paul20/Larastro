@@ -169,6 +169,7 @@
     <!-- Dialog Create Permission -->
     <Dialog
       v-model:visible="permissionDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Role Details"
       :modal="true"
@@ -259,6 +260,7 @@
     <!-- Dialog Delete Permission -->
     <Dialog
       v-model:visible="deletePermissionDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
@@ -284,6 +286,7 @@
     <!-- Dialog Delete Permissions -->
     <Dialog
       v-model:visible="deletePermissionsDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"

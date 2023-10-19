@@ -198,6 +198,7 @@
     <!-- Dialog Create Role -->
     <Dialog
       v-model:visible="roleDialog"
+      :closable="false"
       :style="{ width: '500px' }"
       header="Role Details"
       :modal="true"
@@ -320,6 +321,7 @@
     <!-- Dialog Delete Role -->
     <Dialog
       v-model:visible="deleteRoleDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
@@ -340,6 +342,7 @@
     <!-- Dialog Delete Roles -->
     <Dialog
       v-model:visible="deleteRolesDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
@@ -452,7 +455,7 @@ const getAllRoles = () => {
     .then((resp: any) => {
       roles.value = resp.data;
       loading.value = false;
-      console.log(roles.value);
+      // console.log(roles.value);
     })
     .catch((error: string) => {
       console.error(error);
@@ -509,6 +512,7 @@ const saveRole = () => {
       role.value.permissions = [];
     }
     // console.log(role.value);
+
     // Create Role
     if (createOrUpdate.value) {
       store

@@ -19,7 +19,7 @@ class PermissionsController extends Controller
         // $this->authorize("view", Role::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
 
-        if (request()->wantsJson())
+        if (request()->wantsJson()) {
             try {
                 $rowDatas = Permission::orderBy('id', 'asc')
                     ->paginate(
@@ -47,6 +47,7 @@ class PermissionsController extends Controller
                     "errors" => $th->getMessage()
                 ], 422);
             }
+        }
 
         return "The access for get all permissions is just for JSON request";
     }

@@ -182,11 +182,13 @@
     <!-- Dialog Create User -->
     <Dialog
       v-model:visible="userDialog"
-      :style="{ width: '450px' }"
+      :closable="false"
+      :style="{ width: '500px' }"
       header="User Details"
       :modal="true"
       class="p-fluid"
     >
+      <!-- <Fieldset legend="User Information"> -->
       <InputNumber
         id="id"
         v-model.trim="user.id"
@@ -194,102 +196,160 @@
         type="number"
         class="hidden"
       />
-      <div class="field">
-        <label for="name">Name</label>
-        <InputText
-          id="name"
-          v-model.trim="user.name"
-          required="true"
-          autofocus
-          type="text"
-          placeholder="Write a name"
-          :class="{
-            'p-invalid': (submitted && !user?.name) || errors?.name,
-          }"
-          @blur="hideErrors('name')"
-        />
-        <small class="p-error" v-if="submitted && !user?.name">Name is required.</small>
-        <div v-if="errors?.name">
-          <div v-for="(errorName, indexName) in errors.name" :key="indexName">
-            <small class="p-error">{{ errorName }}</small>
+      <div class="grid formgrid">
+        <div class="field col-12 mb-2">
+          <label for="name">Name</label>
+          <InputText
+            id="name"
+            v-model.trim="user.name"
+            required="true"
+            autofocus
+            type="text"
+            placeholder="Write a name"
+            :class="{
+              'p-invalid': (submitted && !user?.name) || errors?.name,
+            }"
+            @blur="hideErrors('name')"
+          />
+          <small class="p-error" v-if="submitted && !user?.name">Name is required.</small>
+          <div v-if="errors?.name">
+            <div v-for="(errorName, indexName) in errors.name" :key="indexName">
+              <small class="p-error">{{ errorName }}</small>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="field">
-        <label for="email">Email</label>
-        <InputText
-          id="email"
-          v-model.trim="user.email"
-          required="true"
-          type="email"
-          placeholder="Write a email"
-          :class="{ 'p-invalid': (submitted && !user.email) || errors?.email }"
-          @blur="hideErrors('email')"
-        />
-        <small class="p-error" v-if="submitted && !user?.email">Email is required.</small>
-        <div v-if="errors?.email">
-          <div v-for="(errorEmail, indexEmail) in errors.email" :key="indexEmail">
-            <small class="p-error">{{ errorEmail }}</small>
-          </div>
-        </div>
-      </div>
-      <div class="field">
-        <label for="password">Password</label>
-        <InputText
-          id="password"
-          v-model.trim="user.password"
-          :required="passwordRequired"
-          type="password"
-          placeholder="Write a password"
-          :class="{
-            'p-invalid':
-              (submitted && !user.password && passwordRequired) || errors?.password,
-          }"
-          @blur="hideErrors('password')"
-        />
-        <small class="p-error" v-if="submitted && !user?.password && passwordRequired"
-          >Password is required.</small
-        >
-        <div v-if="errors?.password">
-          <div
-            v-for="(errorPassword, indexPassword) in errors.password"
-            :key="indexPassword"
+        <div class="field col-12 mb-2">
+          <label for="email">Email</label>
+          <InputText
+            id="email"
+            v-model.trim="user.email"
+            required="true"
+            type="email"
+            placeholder="Write a email"
+            :class="{ 'p-invalid': (submitted && !user.email) || errors?.email }"
+            @blur="hideErrors('email')"
+          />
+          <small class="p-error" v-if="submitted && !user?.email"
+            >Email is required.</small
           >
-            <small class="p-error">{{ errorPassword }}</small>
+          <div v-if="errors?.email">
+            <div v-for="(errorEmail, indexEmail) in errors.email" :key="indexEmail">
+              <small class="p-error">{{ errorEmail }}</small>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="field">
-        <label for="password_confirmation">Repeat Password</label>
-        <InputText
-          id="password_confirmation"
-          v-model.trim="user.password_confirmation"
-          :required="passwordRequired"
-          type="password"
-          placeholder="Repeat a password"
-          :class="{
-            'p-invalid':
-              (submitted && !user?.password_confirmation && passwordRequired) ||
-              errors?.password_confirmation,
-          }"
-          @blur="hideErrors('password_confirmation')"
-        />
-        <small
-          class="p-error"
-          v-if="submitted && !user?.password_confirmation && passwordRequired"
-          >Password is required.</small
-        >
-        <div v-if="errors?.password_confirmation">
-          <div
-            v-for="(
-              errorPasswordConfirmation, indexPasswordConfirmation
-            ) in errors.password_confirmation"
-            :key="indexPasswordConfirmation"
+        <div class="field col-12 mb-2 lg:col-6">
+          <label for="password">Password</label>
+          <InputText
+            id="password"
+            v-model.trim="user.password"
+            :required="passwordRequired"
+            type="password"
+            placeholder="Write a password"
+            :class="{
+              'p-invalid':
+                (submitted && !user.password && passwordRequired) || errors?.password,
+            }"
+            @blur="hideErrors('password')"
+          />
+          <small class="p-error" v-if="submitted && !user?.password && passwordRequired"
+            >Password is required.</small
           >
-            <small class="p-error">{{ errorPasswordConfirmation }}</small>
+          <div v-if="errors?.password">
+            <div
+              v-for="(errorPassword, indexPassword) in errors.password"
+              :key="indexPassword"
+            >
+              <small class="p-error">{{ errorPassword }}</small>
+            </div>
+          </div>
+        </div>
+        <div class="field col-12 mb-2 lg:col-6">
+          <label for="password_confirmation">Repeat Password</label>
+          <InputText
+            id="password_confirmation"
+            v-model.trim="user.password_confirmation"
+            :required="passwordRequired"
+            type="password"
+            placeholder="Repeat a password"
+            :class="{
+              'p-invalid':
+                (submitted && !user?.password_confirmation && passwordRequired) ||
+                errors?.password_confirmation,
+            }"
+            @blur="hideErrors('password_confirmation')"
+          />
+          <small
+            class="p-error"
+            v-if="submitted && !user?.password_confirmation && passwordRequired"
+            >Password is required.</small
+          >
+          <div v-if="errors?.password_confirmation">
+            <div
+              v-for="(
+                errorPasswordConfirmation, indexPasswordConfirmation
+              ) in errors.password_confirmation"
+              :key="indexPasswordConfirmation"
+            >
+              <small class="p-error">{{ errorPasswordConfirmation }}</small>
+            </div>
           </div>
         </div>
       </div>
+      <!-- </Fieldset> -->
+
+      <h5>Roles</h5>
+      <div class="card px-3 py-3">
+        <div class="grid">
+          <div class="col-12 md:col-3" v-for="role in roles">
+            <div class="field-checkbox mb-0">
+              <Checkbox
+                :id="role.name"
+                :name="role.name"
+                :value="role.name"
+                v-model="checkboxRoles"
+              />
+              <label :for="role.name">{{ role.name }}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h5>Permissions</h5>
+      <div class="card px-3 py-3">
+        <div
+          v-for="(catalogPermission, indexCatalogPermission) in catalogPermissions"
+          :key="indexCatalogPermission"
+        >
+          <div class="flex">
+            <h5>For {{ catalogPermission }}s</h5>
+            <InputSwitch
+              v-model="switchPermissions[catalogPermission + 'sSwitchPermissions']"
+              class="ml-auto custom-margin-right"
+            />
+          </div>
+          <div class="grid">
+            <div
+              class="col-12 md:col-3"
+              v-for="(permission, indexPermission) in categorizedPermissions[
+                catalogPermission + 'sPermissions'
+              ]"
+              :key="indexPermission"
+            >
+              <div class="field-checkbox mb-0">
+                <Checkbox
+                  :id="permission"
+                  :name="permission"
+                  :value="permission"
+                  v-model="checkboxPermissions"
+                />
+                <label :for="permission">{{ permission }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
         <Button label="Save" icon="pi pi-check" text @click="saveUser" />
@@ -299,6 +359,7 @@
     <!-- Dialog Delete User -->
     <Dialog
       v-model:visible="deleteUserDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
@@ -319,6 +380,7 @@
     <!-- Dialog Delete Users -->
     <Dialog
       v-model:visible="deleteUsersDialog"
+      :closable="false"
       :style="{ width: '450px' }"
       header="Confirm"
       :modal="true"
@@ -342,7 +404,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
 import { FilterMatchMode } from "primevue/api";
 import { usersStore } from "@js/stores/Users";
@@ -360,6 +422,15 @@ const user = ref<DatumUser>();
 const users = ref<DatumUser[]>([]);
 const roles = ref<RoleUser[]>([]);
 const permissions = ref<PermissionUser[]>([]);
+const catalogPermissions = ref<string[]>(["User", "Role", "Permission"]);
+const categorizedPermissions = ref<Record<string, string[]>>({});
+const switchPermissions = ref<Record<string, boolean>>({});
+catalogPermissions.value.forEach((catalogPermission) => {
+  categorizedPermissions.value[catalogPermission + "sPermissions"] = [];
+  switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+});
+const checkboxPermissions = ref<string[]>([]);
+const checkboxRoles = ref<string[]>([]);
 const loading = ref<boolean>();
 const userDialog = ref<boolean>(false);
 const deleteUserDialog = ref<boolean>(false);
@@ -385,7 +456,14 @@ const openNew = () => {
     email: "",
     password: "",
     password_confirmation: "",
+    permissions: [],
+    roles: [],
   };
+  checkboxPermissions.value = [];
+  checkboxRoles.value = [];
+  catalogPermissions.value.forEach((catalogPermission) => {
+    switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+  });
   submitted.value = false;
   userDialog.value = true;
   errors.value = null;
@@ -400,7 +478,14 @@ const hideDialog = () => {
     email: "",
     password: "",
     password_confirmation: "",
+    permissions: [],
+    roles: [],
   };
+  checkboxPermissions.value = [];
+  checkboxRoles.value = [];
+  catalogPermissions.value.forEach((catalogPermission) => {
+    switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
+  });
 };
 const hideErrors = (field: string) => {
   if (errors.value && field in errors.value) {
@@ -430,9 +515,41 @@ const getAllRoles = () => {
   storeRoles
     .getAllRoles()
     .then((resp: any) => {
-      //console.log(resp);
       if (resp.data) {
-        user.value.roles = resp.data;
+        roles.value = resp.data;
+        loading.value = false;
+        // console.log("ROLES SON:", roles.value);
+      }
+    })
+    .catch((error: string) => {
+      console.error(error);
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get roles list: " + error,
+        life: 3000,
+      });
+    });
+};
+const getAllPermissions = () => {
+  storePermissions
+    .getAllPermissions()
+    .then((resp: any) => {
+      if (resp.data) {
+        permissions.value = resp.data;
+        loading.value = false;
+        permissions.value.forEach((permission) => {
+          permission.tags.forEach((tag) => {
+            catalogPermissions.value.forEach((catalogPermission) => {
+              if (tag === catalogPermission) {
+                categorizedPermissions.value[catalogPermission + "sPermissions"].push(
+                  permission.name
+                );
+              }
+            });
+          });
+        });
+        // console.log("PERMISOS SON:", permissions.value);
       }
     })
     .catch((error: string) => {
@@ -450,6 +567,26 @@ const saveUser = () => {
   passwordRequired.value = user.value?.id === 0 ? true : false;
 
   if (user.value?.name.trim() && user.value?.email.trim()) {
+    if (checkboxPermissions.value.length > 0) {
+      user.value.permissions = checkboxPermissions.value.map((permissionName) => {
+        return {
+          name: permissionName,
+        };
+      });
+    } else {
+      user.value.permissions = [];
+    }
+    if (checkboxRoles.value.length > 0) {
+      user.value.roles = checkboxRoles.value.map((roleName) => {
+        return {
+          name: roleName,
+        };
+      });
+    } else {
+      user.value.roles = [];
+    }
+    // return console.log(user.value);
+
     // Create User
     if (passwordRequired.value) {
       if (user.value?.password.trim() && user.value?.password_confirmation.trim()) {
@@ -471,6 +608,8 @@ const saveUser = () => {
                     email: "",
                     password: "",
                     password_confirmation: "",
+                    permissions: [],
+                    roles: [],
                   };
                   userDialog.value = false;
                   toast.add({
@@ -555,6 +694,12 @@ const saveUser = () => {
 };
 const editUser = (prod: DatumUser) => {
   user.value = { ...prod };
+  user.value.permissions.forEach((permission) => {
+    checkboxPermissions.value.push(permission.name);
+  });
+  user.value.roles.forEach((role) => {
+    checkboxRoles.value.push(role.name);
+  });
   userDialog.value = true;
   submitted.value = false;
   errors.value = null;
@@ -577,6 +722,8 @@ const deleteUser = () => {
             email: "",
             password: "",
             password_confirmation: "",
+            permissions: [],
+            roles: [],
           };
           deleteUserDialog.value = false;
           toast.add({
@@ -672,6 +819,23 @@ const deleteSelectedUsers = () => {
 onBeforeMount(() => {
   //Antes de que se monte el componente se obtienen todos los usuarios
   getAllUsers();
+  getAllRoles();
+  getAllPermissions();
+});
+//
+watch(switchPermissions.value, (newValues) => {
+  const selectedPermissions = <string[]>[];
+  Object.keys(newValues).forEach((key) => {
+    const value: boolean = newValues[key];
+    const permissionType = key.replace("SwitchPermissions", "Permissions");
+    const permissions = categorizedPermissions.value[permissionType];
+
+    if (value) {
+      selectedPermissions.push(...permissions);
+    }
+  });
+
+  checkboxPermissions.value = selectedPermissions;
 });
 //
 </script>

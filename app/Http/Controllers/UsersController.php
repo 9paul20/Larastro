@@ -16,7 +16,7 @@ class UsersController extends Controller
     {
         // $this->authorize("view", User::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
-        if (request()->wantsJson())
+        if (request()->wantsJson()) {
             try {
                 $rowDatas = User::orderBy('id', 'asc')
                     ->with([
@@ -32,12 +32,12 @@ class UsersController extends Controller
                         ],
                         "users_page"
                     );
-                $rowDatas->transform(function ($user) {
-                    $user->roles = $user->roles === "" ? [] : explode(', ', $user->roles);
-                    // $user->roles = $this->getUserRoles($user->id);
-                    // $user->permissions = $this->getUserPermissions($user->id);
-                    return $user;
-                });
+                // $rowDatas->transform(function ($user) {
+                //     $user->roles = $user->roles === "" ? [] : explode(', ', $user->roles);
+                //     $user->roles = $this->getUserRoles($user->id);
+                //     $user->permissions = $this->getUserPermissions($user->id);
+                //     return $user;
+                // });
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
                 return response()->json([
@@ -47,6 +47,7 @@ class UsersController extends Controller
                     "errors" => $th->getMessage()
                 ], 422);
             }
+        }
         return "The access for get all users is just for JSON request";
     }
 
@@ -105,7 +106,17 @@ class UsersController extends Controller
     {
         if (request()->wantsJson()) {
             try {
+                $roles = $request->input('roles', []);
+                $permissions = $request->input('permissions', []);
+
                 $user = User::create($request->all());
+
+                if (!empty($roles))
+                    $user->syncRoles(array_column($roles, 'name'));
+
+                if (!empty($permissions))
+                    $user->syncPermissions(array_column($permissions, 'name'));
+
                 return response()->json([
                     "severity" => "success",
                     "summary" => "Successful",
@@ -130,8 +141,22 @@ class UsersController extends Controller
     {
         if (request()->wantsJson()) {
             try {
+                $roles = $request->input('roles', []);
+                $permissions = $request->input('permissions', []);
+
                 $user = User::findOrFail($id);
                 $user->updateOrFail($request->all());
+
+                if (empty($roles))
+                    $user->permissions()->detach();
+                else
+                    $user->syncRoles(array_column($roles, 'name'));
+
+                if (empty($permissions))
+                    $user->permissions()->detach();
+                else
+                    $user->syncPermissions(array_column($permissions, 'name'));
+
                 return response()->json([
                     "severity" => "info",
                     "summary" => "Successful",
@@ -172,6 +197,8 @@ class UsersController extends Controller
                     //         "detail" => $user->name . ", You cannot delete the main admin."
                     //     ], 422);
                 }
+                $user->syncRoles([]);
+                $user->syncPermissions([]);
                 $user->deleteOrFail();
                 return response()->json([
                     "severity" => "warn",
@@ -203,6 +230,10 @@ class UsersController extends Controller
                 ], 400);
             }
             try {
+                User::whereIn('id', $usersID)->each(function ($user) {
+                    $user->syncPermissions([]);
+                    $user->syncRoles([]);
+                });
                 User::whereIn('id', $usersID)->delete();
                 return response()->json([
                     "severity" => "warn",

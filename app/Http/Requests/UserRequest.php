@@ -29,6 +29,10 @@ class UserRequest extends FormRequest
             'email' => 'required|email|unique:users,email,' . $id . ',id',
             'password' => 'string|min:4|max:255|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
             'password_confirmation' => 'string|min:4|max:255|same:password',
+            'permissions' => 'nullable|array|max:255',
+            'permissions.*.name' => 'nullable|string|distinct|min:4|max:255',
+            'roles' => 'nullable|array|max:255',
+            'roles.*.name' => 'nullable|string|distinct|min:4|max:255',
         ];
     }
 
@@ -52,6 +56,18 @@ class UserRequest extends FormRequest
             'password_confirmation.min' => 'Confirm Password Length Should Be More Than 4 Character Or Digit Or Mix, Thank You.',
             'password_confirmation.max' => 'Confirm Password Length Should Be Less Than 255 Character Or Digit Or Mix, Thank You.',
             'password_confirmation.same' => 'Password And Confirm Password Should Be Same, Thank You.',
+            'permissions.array' => 'Please Provide Your Permissions As Array, Thank You.',
+            'permissions.max' => 'Please Provide Your Permissions With Maximum 255 Permissions, Thank You.',
+            'permissions.*.name.string' => 'Please Provide Your Permissions As String, Thank You.',
+            'permissions.*.name.distinct' => 'Please Provide Your Permissions Without Duplicates, Thank You.',
+            'permissions.*.name.min' => 'Please Provide Your Permissions With Minimum 4 Characters, Thank You.',
+            'permissions.*.name.max' => 'Please Provide Your Permissions With Maximum 255 Characters, Thank You.',
+            'roles.array' => 'Please Provide Your Roles As Array, Thank You.',
+            'roles.max' => 'Please Provide Your Roles With Maximum 255 Roles, Thank You.',
+            'roles.*.name.string' => 'Please Provide Your Roles As String, Thank You.',
+            'roles.*.name.distinct' => 'Please Provide Your Roles Without Duplicates, Thank You.',
+            'roles.*.name.min' => 'Please Provide Your Roles With Minimum 4 Characters, Thank You.',
+            'roles.*.name.max' => 'Please Provide Your Roles With Maximum 255 Characters, Thank You.',
         ];
     }
 

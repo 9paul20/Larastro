@@ -17,7 +17,7 @@ class RolesController extends Controller
     {
         // $this->authorize("view", Role::class);
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
-        if (request()->wantsJson())
+        if (request()->wantsJson()) {
             try {
                 $rowDatas = Role::orderBy('id', 'asc')
                     ->with('permissions:id,name,guard_name,description,tags')
@@ -47,6 +47,7 @@ class RolesController extends Controller
                     "errors" => $th->getMessage()
                 ], 422);
             }
+        }
 
         return "The access for get all roles is just for JSON request";
     }
