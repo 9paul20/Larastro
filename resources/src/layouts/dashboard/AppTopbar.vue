@@ -45,10 +45,11 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useLayout } from "@src/layouts/composables/layout";
 // import { useRouter } from 'vue-router';
 //
-const { onMenuToggle, layoutState } = useLayout();
+const { onMenuToggle, layoutState, changeThemeSettings, layoutConfig } = useLayout();
 //
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
+const darkTheme = ref(layoutConfig.darkTheme);
 // const router = useRouter();
 //
 onMounted(() => {
@@ -107,14 +108,40 @@ const items = ref([
   { label: "Settings", icon: "pi pi-fw pi-cog" },
   { separator: true },
   { label: "Log Out", icon: "pi pi-sign-out", to: "/" },
+  {
+    label: "Change Theme",
+    icon: "pi pi-sun",
+    command: () => {
+      if (darkTheme.value) {
+        onChangeTheme("lara-light-indigo", "light");
+      } else {
+        onChangeTheme("lara-dark-indigo", "dark");
+      }
+    },
+  },
 ]);
-
+const onChangeTheme = (theme, mode) => {
+  const elementId = "theme-css";
+  const linkElement = document.getElementById(elementId);
+  const cloneLinkElement = linkElement.cloneNode(true);
+  const newThemeUrl = linkElement
+    .getAttribute("href")
+    .replace(layoutConfig.theme.value, theme);
+  cloneLinkElement.setAttribute("id", elementId + "-clone");
+  cloneLinkElement.setAttribute("href", newThemeUrl);
+  cloneLinkElement.addEventListener("load", () => {
+    linkElement.remove();
+    cloneLinkElement.setAttribute("id", elementId);
+    changeThemeSettings(theme, mode === "dark");
+  });
+  linkElement.parentNode.insertBefore(cloneLinkElement, linkElement.nextSibling);
+  darkTheme.value = mode === "dark";
+};
 const toggle = (event) => {
   onTopBarMenuButton();
   menu.value.toggle(event);
 };
 //
-// console.log(layoutState.showButtonHover.value);
 </script>
 
 <style lang="scss" scoped></style>

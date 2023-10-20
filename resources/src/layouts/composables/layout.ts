@@ -1,4 +1,8 @@
 import { toRefs, reactive, computed } from 'vue';
+// import '@node_modules/primevue/resources/themes/lara-light-indigo/theme.css';
+// import '@node_modules/primevue/resources/themes/lara-dark-indigo/theme.css';
+// import '@node_modules/primeflex/themes/primeone-light.scss';
+// import '@node_modules/primeflex/themes/primeone-dark.scss';
 //
 const layoutConfig = reactive({
     ripple: false,

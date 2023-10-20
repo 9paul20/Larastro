@@ -2,6 +2,7 @@ import axios from "axios";
 import { createApp } from "vue/dist/vue.esm-bundler";
 import { createPinia } from 'pinia';
 import configureApp from "@src/configureApp";
+import '@/css/app.scss';
 //
 const { components, directives, uses } = configureApp;
 const app = createApp();
