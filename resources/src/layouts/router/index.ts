@@ -67,6 +67,12 @@ const router = createRouter({
                         import("@src/views/pages/dashboard/Users.vue"),
                 },
                 {
+                    path: "/dashboard/tags",
+                    name: "Tags",
+                    component: () =>
+                        import("@src/views/pages/dashboard/Tags.vue"),
+                },
+                {
                     path: "/dashboard/roles",
                     name: "Roles",
                     component: () =>

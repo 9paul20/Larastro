@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RoleRequest;
+use App\Models\CustomRole;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
+// use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
 class RolesController extends Controller
@@ -19,7 +20,7 @@ class RolesController extends Controller
         $perPage = $request->wantsJson() ? 999999999999999999 : 10;
         if (request()->wantsJson()) {
             try {
-                $rowDatas = Role::orderBy('id', 'asc')
+                $rowDatas = CustomRole::orderBy('id', 'asc')
                     ->with('permissions:id,name,guard_name,description,tags')
                     ->paginate(
                         $perPage,
@@ -63,9 +64,9 @@ class RolesController extends Controller
                 if ($request->has('tags') && is_array($request->tags)) {
                     $tagsToString = implode(', ', $request->tags);
                     $request->merge(['tags' => $tagsToString]);
-                    $role = Role::create($request->all());
+                    $role = CustomRole::create($request->all());
                 } else {
-                    $role = Role::create($request->all());
+                    $role = CustomRole::create($request->all());
                 }
 
                 $role->syncPermissions(array_column($permissions, 'name'));
@@ -99,12 +100,12 @@ class RolesController extends Controller
                 if ($request->has('tags')) {
                     $tagsToString = implode(', ', $request->tags);
                     $request->merge(['tags' => $tagsToString]);
-                    $role = Role::findOrFail($id);
+                    $role = CustomRole::findOrFail($id);
                     $role->updateOrFail($request->all());
                     $role->save();
                 } elseif (empty($request->tags)) {
                     $request->merge(['tags' => null]);
-                    $role = Role::findOrFail($id);
+                    $role = CustomRole::findOrFail($id);
                     $role->updateOrFail($request->all());
                     $role->save();
                 }
@@ -138,7 +139,7 @@ class RolesController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $role = Role::findOrFail($id);
+                $role = CustomRole::findOrFail($id);
                 if (auth()->check()) { //Por el momento este if se usa por que aun no manejo los roles e inicios de sesión
                     $user = auth()->user();
                     if ($user->hasRole($role->name))
@@ -196,10 +197,10 @@ class RolesController extends Controller
             }
 
             try {
-                Role::whereIn('id', $rolesID)->each(function ($role) {
+                CustomRole::whereIn('id', $rolesID)->each(function ($role) {
                     $role->syncPermissions([]);
                 });
-                Role::whereIn('id', $rolesID)->delete();
+                CustomRole::whereIn('id', $rolesID)->delete();
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",

@@ -32,6 +32,11 @@ const model = ref([
         to: "/dashboard/users",
       },
       {
+        label: "Tags",
+        icon: "pi pi-fw pi-home",
+        to: "/dashboard/tags",
+      },
+      {
         label: "Roles",
         icon: "pi pi-fw pi-home",
         to: "/dashboard/roles",

@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\CustomRole;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+// use Spatie\Permission\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
@@ -89,9 +90,7 @@ class PermissionSeeder extends Seeder
             'tags' => 'Delete, Permissions, Permission'
         ]);
 
-        //Sync Permissions with Role Admin
-        // $RAdmin = Role::where('name', 'Admin')->first();
-        $RAdmin = Role::findByName('Admin')->first();
+        $RAdmin = CustomRole::findByName('Admin')->first();
         if ($RAdmin) {
             $RAdmin->syncPermissions([
                 $CUsers,
@@ -108,21 +107,5 @@ class PermissionSeeder extends Seeder
                 $DPermissions
             ]);
         }
-        // if ($RAdmin) {
-        //     $RAdmin->givePermissionTo([
-        //         $CUser,
-        //         $RUser,
-        //         $UUser,
-        //         $DUser,
-        //         $CRole,
-        //         $RRole,
-        //         $URole,
-        //         $DRole,
-        //         $CPermission,
-        //         $RPermission,
-        //         $UPermission,
-        //         $DPermission
-        //     ]);
-        // }
     }
 }

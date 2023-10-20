@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\CustomRole;
+use App\Models\Tag;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
+// use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -13,12 +15,13 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $RAdmin = Role::create([
+        $RAdmin = CustomRole::create([
             'name' => 'Admin',
             'description' => 'Administrators have full access to all features and functionalities',
             'tags' => 'Admin, Role'
         ]);
-        $RUser = Role::create([
+
+        $RUser = CustomRole::create([
             'name' => 'User',
             'description' => 'Standard users with limited privileges',
             'tags' => 'User, Role'

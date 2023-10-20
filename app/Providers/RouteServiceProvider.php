@@ -42,6 +42,9 @@ class RouteServiceProvider extends ServiceProvider
                     //Users
                     include(base_path('routes/users.php'));
 
+                    //Tags
+                    include(base_path('routes/tags.php'));
+
                     //Roles
                     include(base_path('routes/roles.php'));
 
