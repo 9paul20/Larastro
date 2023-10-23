@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\CustomPermission;
 use App\Models\CustomRole;
+use App\Models\Tag;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-// use Spatie\Permission\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
@@ -16,78 +16,218 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         //Users
-        $CUsers = Permission::create([
+        $CUsers = CustomPermission::create([
             'name' => 'Create Users',
             'description' => 'Allows user to create new users',
             'tags' => 'Create, Users, User'
         ]);
 
-        $RUsers = Permission::create([
+        $TCreate = Tag::where('name', 'Create')->first();
+        $TUsers = Tag::where('name', 'Users')->first();
+        $TUser = Tag::where('name', 'User')->first();
+
+        $CUsers->tags()->sync([
+            $TCreate->id,
+            $TUsers->id,
+            $TUser->id,
+        ]);
+
+        $RUsers = CustomPermission::create([
             'name' => 'Read Users',
             'description' => 'Allows user to view user details',
             'tags' => 'Read, Users, User'
         ]);
 
-        $UUsers = Permission::create([
+        $TRead = Tag::where('name', 'Read')->first();
+
+        $RUsers->tags()->sync([
+            $TRead->id,
+            $TUsers->id,
+            $TUser->id,
+        ]);
+
+        $UUsers = CustomPermission::create([
             'name' => 'Update Users',
             'description' => 'Allows user to edit user information',
             'tags' => 'Update, Users, User'
         ]);
 
-        $DUsers = Permission::create([
+        $TUpdate = Tag::where('name', 'Update')->first();
+
+        $UUsers->tags()->sync([
+            $TUpdate->id,
+            $TUsers->id,
+            $TUser->id,
+        ]);
+
+        $DUsers = CustomPermission::create([
             'name' => 'Delete Users',
             'description' => 'Allows user to delete users',
             'tags' => 'Delete, Users, User'
         ]);
 
+        $TDelete = Tag::where('name', 'Delete')->first();
+
+        $DUsers->tags()->sync([
+            $TDelete->id,
+            $TUsers->id,
+            $TUser->id,
+        ]);
+
+        //Tags
+        $CTags = CustomPermission::create([
+            'name' => 'Create Tags',
+            'description' => 'Allows user to create new tags',
+            'tags' => 'Create, Tags, Tag'
+        ]);
+
+        $TTags = Tag::where('name', 'Tags')->first();
+        $TTag = Tag::where('name', 'Tag')->first();
+
+        $CTags->tags()->sync([
+            $TCreate->id,
+            $TTags->id,
+            $TTag->id,
+        ]);
+
+        $RTags = CustomPermission::create([
+            'name' => 'Read Tags',
+            'description' => 'Allows user to view tag details',
+            'tags' => 'Read, Tags, Tag'
+        ]);
+
+        $RTags->tags()->sync([
+            $TRead->id,
+            $TTags->id,
+            $TTag->id,
+        ]);
+
+        $UTags = CustomPermission::create([
+            'name' => 'Update Tags',
+            'description' => 'Allows user to edit tag information',
+            'tags' => 'Update, Tags, Tag'
+        ]);
+
+        $UTags->tags()->sync([
+            $TUpdate->id,
+            $TTags->id,
+            $TTag->id,
+        ]);
+
+        $DTags = CustomPermission::create([
+            'name' => 'Delete Tags',
+            'description' => 'Allows user to delete tags',
+            'tags' => 'Delete, Tags, Tag'
+        ]);
+
+        $DTags->tags()->sync([
+            $TDelete->id,
+            $TTags->id,
+            $TTag->id,
+        ]);
+
         //Roles
-        $CRoles = Permission::create([
+        $CRoles = CustomPermission::create([
             'name' => 'Create Roles',
             'description' => 'Allows user to create new roles',
             'tags' => 'Create, Roles, Role'
         ]);
 
-        $RRoles = Permission::create([
+        $TRoles = Tag::where('name', 'Roles')->first();
+        $TRole = Tag::where('name', 'Role')->first();
+
+        $CRoles->tags()->sync([
+            $TDelete->id,
+            $TRoles->id,
+            $TRole->id,
+        ]);
+
+        $RRoles = CustomPermission::create([
             'name' => 'Read Roles',
             'description' => 'Allows user to view role details',
             'tags' => 'Read, Roles, Role'
         ]);
 
-        $URoles = Permission::create([
+        $RRoles->tags()->sync([
+            $TRead->id,
+            $TRoles->id,
+            $TRole->id,
+        ]);
+
+        $URoles = CustomPermission::create([
             'name' => 'Update Roles',
             'description' => 'Allows user to edit role information',
             'tags' => 'Update, Roles, Role'
         ]);
 
-        $DRoles = Permission::create([
+        $URoles->tags()->sync([
+            $TUpdate->id,
+            $TRoles->id,
+            $TRole->id,
+        ]);
+
+        $DRoles = CustomPermission::create([
             'name' => 'Delete Roles',
             'description' => 'Allows user to delete roles',
             'tags' => 'Delete, Roles, Role'
         ]);
 
+        $DRoles->tags()->sync([
+            $TDelete->id,
+            $TRoles->id,
+            $TRole->id,
+        ]);
+
         //Permissions
-        $CPermissions = Permission::create([
+        $CPermissions = CustomPermission::create([
             'name' => 'Create Permissions',
             'description' => 'Allows user to create new permissions',
             'tags' => 'Create, Permissions, Permission'
         ]);
 
-        $RPermissions = Permission::create([
+        $TPermissions = Tag::where('name', 'Permissions')->first();
+        $TPermission = Tag::where('name', 'Permission')->first();
+
+        $CPermissions->tags()->sync([
+            $TCreate->id,
+            $TPermissions->id,
+            $TPermission->id,
+        ]);
+
+        $RPermissions = CustomPermission::create([
             'name' => 'Read Permissions',
             'description' => 'Allows user to view permission details',
             'tags' => 'Read, Permissions, Permission'
         ]);
 
-        $UPermissions = Permission::create([
+        $RPermissions->tags()->sync([
+            $TRead->id,
+            $TPermissions->id,
+            $TPermission->id,
+        ]);
+
+        $UPermissions = CustomPermission::create([
             'name' => 'Update Permissions',
             'description' => 'Allows user to edit permission information',
             'tags' => 'Update, Permissions, Permission'
         ]);
 
-        $DPermissions = Permission::create([
+        $UPermissions->tags()->sync([
+            $TUpdate->id,
+            $TPermissions->id,
+            $TPermission->id,
+        ]);
+
+        $DPermissions = CustomPermission::create([
             'name' => 'Delete Permissions',
             'description' => 'Allows user to delete permissions',
             'tags' => 'Delete, Permissions, Permission'
+        ]);
+
+        $DPermissions->tags()->sync([
+            $TDelete->id,
+            $TPermissions->id,
+            $TPermission->id,
         ]);
 
         $RAdmin = CustomRole::findByName('Admin')->first();
@@ -97,6 +237,10 @@ class PermissionSeeder extends Seeder
                 $RUsers,
                 $UUsers,
                 $DUsers,
+                $CTags,
+                $RTags,
+                $UTags,
+                $DTags,
                 $CRoles,
                 $RRoles,
                 $URoles,

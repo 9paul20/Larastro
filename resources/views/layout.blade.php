@@ -14,8 +14,6 @@
     <meta name="theme-color" content="#FFFFFF" />
     {{-- <link rel="shortcut icon" href="{{ url('/images/John_Deere_Logo.png') }}" /> --}}
     <title inertia>@yield('meta-title', config('app.name'))</title>
-    {{-- <link id="theme-css" rel="stylesheet" type="text/css"
-        href="{{ asset('node_modules/primevue/resources/themes/lara-light-indigo/theme.css') }}"> --}}
     <link id="theme-css" rel="stylesheet" type="text/css"
         href="{{ mix('node_modules/primevue/resources/themes/lara-light-indigo/theme.css') }}">
 

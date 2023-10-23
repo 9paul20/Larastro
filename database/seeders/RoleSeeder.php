@@ -6,7 +6,6 @@ use App\Models\CustomRole;
 use App\Models\Tag;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-// use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -21,10 +20,25 @@ class RoleSeeder extends Seeder
             'tags' => 'Admin, Role'
         ]);
 
+        $TAdmin = Tag::where('name', 'Admin')->first();
+        $TRole = Tag::where('name', 'Role')->first();
+
+        $RAdmin->tags()->sync([
+            $TAdmin->id,
+            $TRole->id,
+        ]);
+
         $RUser = CustomRole::create([
             'name' => 'User',
             'description' => 'Standard users with limited privileges',
             'tags' => 'User, Role'
+        ]);
+
+        $TUser = Tag::where('name', 'User')->first();
+
+        $RUser->tags()->sync([
+            $TUser->id,
+            $TRole->id
         ]);
     }
 }

@@ -28,7 +28,7 @@
               type="button"
               icon="pi pi-refresh"
               text
-              @click="getAllRoles(), getAllPermissions()"
+              @click="getAllRoles(), getAllTags(), getAllPermissions()"
             />
           </template>
           <template #paginatorend>
@@ -121,7 +121,7 @@
                     :class="{ 'p-mr-2': index !== data.tags.slice(0, 4).length - 1 }"
                     severity="info"
                   >
-                    {{ tag }}
+                    {{ tag.name }}
                   </Tag>
                 </template>
                 <template v-if="data.tags.length > 4">
@@ -256,12 +256,15 @@
       </div>
       <div class="field">
         <label for="tags">Tags</label>
-        <Chips
+        <MultiSelect
           id="tags"
-          v-model.trim="role.tags"
-          separator=","
+          v-model.trim="selectedTags"
+          :options="tags"
           required="false"
-          placeholder="Write a tags"
+          filter
+          optionLabel="name"
+          placeholder="Select Tags"
+          :maxSelectedLabels="4"
           :class="{
             'p-invalid': errors?.tags,
           }"
@@ -370,18 +373,25 @@ import { onBeforeMount, ref, watch } from "vue";
 import { FilterMatchMode } from "primevue/api";
 import { useToast } from "primevue/usetoast";
 import { rolesStore } from "@js/stores/Roles";
+import { tagsStore } from "@js/stores/Tags";
 import { permissionsStore } from "@js/stores/Permissions";
-import { DatumRole, PermissionRole } from "@js/interfaces/Roles/Role";
+import { DatumRole, PermissionRole, TagRole } from "@js/interfaces/Roles/Role";
+import { DatumTag } from "@js/interfaces/Tags/Tag";
+import { DatumPermission } from "@js/interfaces/Permissions/Permission";
 import { RoleLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
 const store = rolesStore();
+const storeTags = tagsStore();
 const storePermissions = permissionsStore();
 const dt = ref<any>();
 const role = ref<DatumRole>();
 const roles = ref<DatumRole[]>([]);
+const tags = ref<DatumTag[]>([]);
+const permission = ref<DatumPermission>();
+const selectedTags = ref<[]>([]);
 const permissions = ref<PermissionRole[]>([]);
-const catalogPermissions = ref<string[]>(["User", "Role", "Permission"]);
+const catalogPermissions = ref<string[]>(["User", "Tag", "Role", "Permission"]);
 const categorizedPermissions = ref<Record<string, string[]>>({});
 const switchPermissions = ref<Record<string, boolean>>({});
 catalogPermissions.value.forEach((catalogPermission) => {
@@ -401,7 +411,7 @@ const submitted = ref<boolean>(false);
 const filters = ref<{}>({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  name: { value: null, matchMode: FilterMatchMode.CONTAINS },
   description: { value: null, matchMode: FilterMatchMode.CONTAINS },
   permissions: { value: null, matchMode: FilterMatchMode.CONTAINS },
   tags: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -418,6 +428,7 @@ const openNew = () => {
     permissions: [],
     tags: [],
   };
+  selectedTags.value = [];
   checkboxPermissions.value = [];
   catalogPermissions.value.forEach((catalogPermission) => {
     switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
@@ -437,6 +448,7 @@ const hideDialog = () => {
     permissions: [],
     tags: [],
   };
+  selectedTags.value = [];
   checkboxPermissions.value = [];
   catalogPermissions.value.forEach((catalogPermission) => {
     switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
@@ -454,6 +466,12 @@ const getAllRoles = () => {
     .getAllRoles()
     .then((resp: any) => {
       roles.value = resp.data;
+      roles.value = resp.data.map((role: DatumRole) => {
+        return {
+          ...role,
+          tags: role.tags.map((tag) => ({ id: tag.id, name: tag.name })),
+        };
+      });
       loading.value = false;
     })
     .catch((error: string) => {
@@ -467,16 +485,43 @@ const getAllRoles = () => {
       });
     });
 };
+const getAllTags = () => {
+  loading.value = true;
+  storeTags
+    .getAllTags()
+    .then((resp: any) => {
+      tags.value = resp.data.map((tag: TagRole) => ({
+        id: tag.id,
+        name: tag.name,
+      }));
+      loading.value = false;
+    })
+    .catch((error: string) => {
+      console.error(error);
+      loading.value = false;
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get tags list: " + error,
+        life: 3000,
+      });
+    });
+};
 const getAllPermissions = () => {
   storePermissions
     .getAllPermissions()
     .then((resp: any) => {
-      permissions.value = resp.data;
+      permissions.value = resp.data.map((permission: DatumPermission) => {
+        return {
+          ...permission,
+          tags: permission.tags.map((tag) => ({ id: tag.id, name: tag.name })),
+        };
+      });
       loading.value = false;
       permissions.value.forEach((permission) => {
         permission.tags.forEach((tag) => {
           catalogPermissions.value.forEach((catalogPermission) => {
-            if (tag === catalogPermission) {
+            if (tag.name === catalogPermission) {
               categorizedPermissions.value[catalogPermission + "sPermissions"].push(
                 permission.name
               );
@@ -502,6 +547,7 @@ const saveRole = () => {
 
   if (role.value?.name.trim()) {
     if (checkboxPermissions.value.length > 0) {
+      role.value.tags = selectedTags.value;
       role.value.permissions = checkboxPermissions.value.map((permissionName) => {
         return {
           name: permissionName,
@@ -531,6 +577,7 @@ const saveRole = () => {
                   permissions: [],
                   tags: [],
                 };
+                selectedTags.value = [];
                 checkboxPermissions.value = [];
                 catalogPermissions.value.forEach((catalogPermission) => {
                   switchPermissions.value[
@@ -558,12 +605,13 @@ const saveRole = () => {
             toast.add({
               severity: respStore.response.data.severity,
               summary: respStore.response.data.summary,
-              detail: respStore.response.data.detail + " " + respStore.response.data.name,
+              detail: respStore.response.data.detail,
               life: 3000,
             });
             console.error(respStore.response);
             if (respStore.response.data) {
               errors.value = respStore.response.data.errors;
+              console.log(errors.value);
             }
           }
         })
@@ -592,6 +640,7 @@ const saveRole = () => {
               permissions: [],
               tags: [],
             };
+            selectedTags.value = [];
             checkboxPermissions.value = [];
             catalogPermissions.value.forEach((catalogPermission) => {
               switchPermissions.value[catalogPermission + "sSwitchPermissions"] = false;
@@ -628,6 +677,9 @@ const saveRole = () => {
 };
 const editRole = (prod: DatumRole) => {
   role.value = { ...prod };
+  role.value.tags.forEach((tag) => {
+    selectedTags.value.push(tag);
+  });
   role.value.permissions.forEach((permission) => {
     checkboxPermissions.value.push(permission.name);
   });
@@ -653,6 +705,7 @@ const deleteRole = () => {
             permissions: [],
             tags: [],
           };
+          selectedTags.value = [];
           deleteRoleDialog.value = false;
           toast.add({
             severity: resp.severity,
@@ -664,9 +717,10 @@ const deleteRole = () => {
           toast.add({
             severity: resp.response.data.severity,
             summary: resp.response.data.summary,
-            detail: resp.response.data.detail + ", " + resp.response.data.name,
+            detail: resp.response.data.detail,
             life: 3000,
           });
+          console.error(resp.response.data.errors);
         }
       })
       .catch((error: string) => {
@@ -727,9 +781,10 @@ const deleteSelectedRoles = () => {
         toast.add({
           severity: resp.response.data.severity,
           summary: resp.response.data.summary,
-          detail: resp.response.data.detail + " " + resp.response.data.name,
+          detail: resp.response.data.detail,
           life: 3000,
         });
+        console.error(resp.response.data.errors);
       }
     })
     .catch((error: string) => {
@@ -745,6 +800,7 @@ const deleteSelectedRoles = () => {
 //
 onBeforeMount(() => {
   getAllRoles();
+  getAllTags();
   getAllPermissions();
 });
 //

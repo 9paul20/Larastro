@@ -6,7 +6,6 @@ use App\Http\Requests\RoleRequest;
 use App\Models\CustomRole;
 use App\Models\User;
 use Illuminate\Http\Request;
-// use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
 
 class RolesController extends Controller
@@ -21,7 +20,10 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             try {
                 $rowDatas = CustomRole::orderBy('id', 'asc')
-                    ->with('permissions:id,name,guard_name,description,tags')
+                    ->with(
+                        'permissions:id,name',
+                        'tags:id,name'
+                    )
                     ->paginate(
                         $perPage,
                         [
@@ -29,15 +31,9 @@ class RolesController extends Controller
                             "name",
                             "guard_name",
                             "description",
-                            "tags",
                         ],
                         "roles_page"
                     );
-                $rowDatas->transform(function ($role) {
-                    $role->tags = $role->tags === "" ? [] : explode(', ', $role->tags);
-                    // $role->permissions = $this->getRolePermissions($role->id);
-                    return $role;
-                });
 
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
@@ -61,10 +57,12 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             try {
                 $permissions = $request->input('permissions', []);
-                if ($request->has('tags') && is_array($request->tags)) {
-                    $tagsToString = implode(', ', $request->tags);
-                    $request->merge(['tags' => $tagsToString]);
+                $tags = $request->input('tags', []);
+                if ($tags && is_array($tags)) {
+                    $tagIds = collect($tags)->pluck('id')->toArray();
+                    unset($request['tags']);
                     $role = CustomRole::create($request->all());
+                    $role->tags()->attach($tagIds);
                 } else {
                     $role = CustomRole::create($request->all());
                 }
@@ -97,18 +95,14 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             try {
                 $permissions = $request->input('permissions', []);
-                if ($request->has('tags')) {
-                    $tagsToString = implode(', ', $request->tags);
-                    $request->merge(['tags' => $tagsToString]);
-                    $role = CustomRole::findOrFail($id);
-                    $role->updateOrFail($request->all());
-                    $role->save();
-                } elseif (empty($request->tags)) {
-                    $request->merge(['tags' => null]);
-                    $role = CustomRole::findOrFail($id);
-                    $role->updateOrFail($request->all());
-                    $role->save();
-                }
+                $tags = $request->input('tags', []);
+                $tagIds = collect($tags)->pluck('id')->toArray();
+                unset($request['tags']);
+                $role = CustomRole::findOrFail($id);
+                $role->updateOrFail($request->all());
+                $role->save();
+                $role->tags()->sync($tagIds);
+
                 if (empty($permissions))
                     $role->permissions()->detach();
                 else
@@ -142,6 +136,7 @@ class RolesController extends Controller
                 $role = CustomRole::findOrFail($id);
                 if (auth()->check()) { //Por el momento este if se usa por que aun no manejo los roles e inicios de sesión
                     $user = auth()->user();
+
                     if ($user->hasRole($role->name))
                         return response()->json([
                             "severity" => "error",
@@ -163,6 +158,7 @@ class RolesController extends Controller
                 }
 
                 $role->syncPermissions([]);
+                $role->tags()->detach();
                 $role->deleteOrFail();
 
                 return response()->json([
@@ -188,6 +184,32 @@ class RolesController extends Controller
         if (request()->wantsJson()) {
             $rolesID = $request->all();
             $rolesCount = count($rolesID);
+            if (auth()->check()) {
+                $user = auth()->user();
+                $rolesInUse = $user->roles()->whereIn('id', $rolesID)->exists();
+                if ($rolesInUse) {
+                    return response()->json([
+                        'severity' => 'error',
+                        'summary' => 'Error',
+                        'detail' => 'One or more roles are in use by the authenticated user.'
+                    ], 400);
+                }
+            }
+
+            $usersWithRoles = User::whereHas('roles', function ($query) use ($rolesID) {
+                $query->whereIn('id', $rolesID);
+            })->exists();
+
+            if ($usersWithRoles) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "This roles is in use and cannot be deleted.",
+                    "errors" => "Roles In Use"
+                ], 422);
+            }
+
+
             if (!$rolesID) {
                 return response()->json([
                     'severity' => 'error',
@@ -197,6 +219,12 @@ class RolesController extends Controller
             }
 
             try {
+                $roleIDs = CustomRole::whereIn('id', $rolesID)->pluck('id')->toArray();
+                CustomRole::whereIn('id', $rolesID)->delete();
+                DB::table('model_has_tags')
+                    ->whereIn('model_id', $roleIDs)
+                    ->where('model_type', CustomRole::class)
+                    ->delete();
                 CustomRole::whereIn('id', $rolesID)->each(function ($role) {
                     $role->syncPermissions([]);
                 });

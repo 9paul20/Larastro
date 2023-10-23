@@ -29,8 +29,9 @@ class RoleRequest extends FormRequest
             'description' => 'nullable|string|min:4|max:255',
             'permissions' => 'nullable|array|max:255',
             'permissions.*.name' => 'nullable|string|distinct|min:4|max:255',
-            'tags' => 'nullable|array|max:255',
-            'tags.*' => 'nullable|string|distinct|min:4|max:255',
+            'tags' => 'nullable|array|min:0|max:255',
+            'tags.*.id' => 'required|integer|distinct|exists:tags,id',
+            'tags.*.name' => 'required|string|distinct|min:3|max:255',
         ];
     }
 
@@ -45,19 +46,24 @@ class RoleRequest extends FormRequest
             'description.string' => 'Please Provide Your Description As String, Thank You.',
             'description.min' => 'Please Provide Your Description With Minimum 4 Characters, Thank You.',
             'description.max' => 'Please Provide Your Description With Maximum 255 Characters, Thank You.',
+            'tags.array' => 'Please Provide Your Tags As Array, Thank You.',
+            'tags.min' => 'Please Provide Your Tags With Minimum 0 Tag, Thank You.',
+            'tags.max' => 'Please Provide Your Tags With Maximum 255 Tags, Thank You.',
+            'tags.*.id.required' => 'Each tag must have an ID, Thank You.',
+            'tags.*.id.integer' => 'The tag ID must be an integer, Thank You.',
+            'tags.*.id.distinct' => 'Please Provide Your Tags Without Duplicates, Thank You',
+            'tags.*.id.exists' => 'The tag ID is not valid, Thank You.',
+            'tags.*.name.required' => 'Each tag must have a name, Thank You.',
+            'tags.*.name.string' => 'The tag name must be a string, Thank You.',
+            'tags.*.name.distinct' => 'Please Provide Your Tags Without Duplicates, Thank You',
+            'tags.*.name.min' => 'The tag name must be at least 3 characters, Thank You.',
+            'tags.*.name.max' => 'The tag name must not exceed 255 characters, Thank You.',
             'permissions.array' => 'Please Provide Your Permissions As Array, Thank You.',
             'permissions.max' => 'Please Provide Your Permissions With Maximum 255 Permissions, Thank You.',
             'permissions.*.name.string' => 'Please Provide Your Permissions As String, Thank You.',
             'permissions.*.name.distinct' => 'Please Provide Your Permissions Without Duplicates, Thank You.',
             'permissions.*.name.min' => 'Please Provide Your Permissions With Minimum 4 Characters, Thank You.',
             'permissions.*.name.max' => 'Please Provide Your Permissions With Maximum 255 Characters, Thank You.',
-            'tags.array' => 'Please Provide Your Tags As Array, Thank You.',
-            'tags.min' => 'Please Provide Your Tags With Minimum 0 Tag, Thank You.',
-            'tags.max' => 'Please Provide Your Tags With Maximum 255 Tags, Thank You.',
-            'tags.*.string' => 'Please Provide Your Tags As String, Thank You.',
-            'tags.*.distinct' => 'Please Provide Your Tags Without Duplicates, Thank You.',
-            'tags.*.min' => 'Please Provide Your Tags With Minimum 4 Characters, Thank You.',
-            'tags.*.max' => 'Please Provide Your Tags With Maximum 255 Characters, Thank You.',
         ];
     }
 

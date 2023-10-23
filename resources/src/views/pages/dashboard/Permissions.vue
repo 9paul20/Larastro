@@ -27,7 +27,7 @@
               type="button"
               icon="pi pi-refresh"
               text
-              @click="getAllPermissions()"
+              @click="getAllPermissions(), getAllTags()"
             />
           </template>
           <template #paginatorend>
@@ -114,13 +114,13 @@
                 v-if="data.tags && data.tags.length > 0"
                 class="flex flex-wrap justify-content-center gap-2"
               >
-                <template v-for="(tag, index) in data.tags.slice(0, 4)">
+                <template v-for="tag in data.tags.slice(0, 4)">
                   <Tag
                     icon="pi pi-user"
-                    :class="{ 'p-mr-2': index !== data.tags.slice(0, 4).length - 1 }"
+                    :class="{ 'p-mr-2': tag.id !== data.tags.slice(0, 4).length - 1 }"
                     severity="info"
                   >
-                    {{ tag }}
+                    {{ tag.name }}
                   </Tag>
                 </template>
                 <template v-if="data.tags.length > 4">
@@ -130,15 +130,6 @@
               <div v-else class="flex flex-wrap justify-content-center gap-2">
                 <Tag icon="pi pi-times" severity="danger">Without Tags</Tag>
               </div>
-            </template>
-            <template #filter="{ filterModel, filterCallback }">
-              <InputText
-                v-model="filterModel.value"
-                type="text"
-                class="p-column-filter"
-                @input="filterCallback()"
-                placeholder="Search by Tags"
-              />
             </template>
           </Column>
           <Column :exportable="false" style="min-width: 9rem">
@@ -171,7 +162,7 @@
       v-model:visible="permissionDialog"
       :closable="false"
       :style="{ width: '450px' }"
-      header="Role Details"
+      header="Permission Details"
       :modal="true"
       class="p-fluid"
     >
@@ -229,12 +220,15 @@
       </div>
       <div class="field">
         <label for="tags">Tags</label>
-        <Chips
+        <MultiSelect
           id="tags"
-          v-model.trim="permission.tags"
-          separator=","
+          v-model.trim="selectedTags"
+          :options="tags"
           required="false"
-          placeholder="Write a tags"
+          filter
+          optionLabel="name"
+          placeholder="Select Tags"
+          :maxSelectedLabels="4"
           :class="{
             'p-invalid': errors?.tags,
           }"
@@ -320,15 +314,20 @@
 import { onBeforeMount, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { permissionsStore } from "@js/stores/Permissions";
+import { tagsStore } from "@js/stores/Tags";
 import { FilterMatchMode } from "primevue/api";
-import { DatumPermission } from "@js/interfaces/Permissions/Permission";
+import { DatumPermission, TagPermission } from "@js/interfaces/Permissions/Permission";
+import { DatumTag } from "@js/interfaces/Tags/Tag";
 import { PermissionLastID } from "@js/interfaces/index";
 //
 const toast = useToast();
 const store = permissionsStore();
+const storeTags = tagsStore();
 const dt = ref<any>();
 const permission = ref<DatumPermission>();
 const permissions = ref<DatumPermission[]>([]);
+const tags = ref<DatumTag[]>([]);
+const selectedTags = ref<[]>([]);
 const loading = ref<boolean>();
 const permissionDialog = ref<boolean>(false);
 const deletePermissionDialog = ref<boolean>(false);
@@ -341,7 +340,7 @@ const submitted = ref<boolean>(false);
 const filters = ref<{}>({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  name: { value: null, matchMode: FilterMatchMode.CONTAINS },
   description: { value: null, matchMode: FilterMatchMode.CONTAINS },
   tags: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
@@ -355,6 +354,7 @@ const openNew = () => {
     description: "",
     tags: [],
   };
+  selectedTags.value = [];
   submitted.value = false;
   permissionDialog.value = true;
   errors.value = null;
@@ -369,6 +369,7 @@ const hideDialog = () => {
     description: "",
     tags: [],
   };
+  selectedTags.value = [];
 };
 const hideErrors = (field: string) => {
   if (errors.value && field in errors.value) {
@@ -381,7 +382,12 @@ const getAllPermissions = () => {
   store
     .getAllPermissions()
     .then((resp: any) => {
-      permissions.value = resp.data;
+      permissions.value = resp.data.map((permission: DatumPermission) => {
+        return {
+          ...permission,
+          tags: permission.tags.map((tag) => ({ id: tag.id, name: tag.name })),
+        };
+      });
       loading.value = false;
     })
     .catch((error: string) => {
@@ -395,11 +401,34 @@ const getAllPermissions = () => {
       });
     });
 };
+const getAllTags = () => {
+  loading.value = true;
+  storeTags
+    .getAllTags()
+    .then((resp: any) => {
+      tags.value = resp.data.map((tag: TagPermission) => ({
+        id: tag.id,
+        name: tag.name,
+      }));
+      loading.value = false;
+    })
+    .catch((error: string) => {
+      console.error(error);
+      loading.value = false;
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Can't get tags list: " + error,
+        life: 3000,
+      });
+    });
+};
 const savePermission = () => {
   submitted.value = true;
   createOrUpdate.value = permission.value?.id === 0 ? true : false;
 
   if (permission.value?.name.trim()) {
+    permission.value.tags = selectedTags.value;
     // Create Permission
     if (createOrUpdate.value) {
       store
@@ -418,6 +447,7 @@ const savePermission = () => {
                   description: "",
                   tags: [],
                 };
+                selectedTags.value = [];
                 permissionDialog.value = false;
                 toast.add({
                   severity: respStore.severity,
@@ -440,11 +470,12 @@ const savePermission = () => {
             toast.add({
               severity: respStore.response.data.severity,
               summary: respStore.response.data.summary,
-              detail: respStore.response.data.detail + " " + respStore.response.data.name,
+              detail: respStore.response.data.detail,
               life: 3000,
             });
             if (respStore.response.data.errors) {
               errors.value = respStore.response.data.errors;
+              console.error(errors.value);
             }
           }
         })
@@ -472,6 +503,7 @@ const savePermission = () => {
               description: "",
               tags: [],
             };
+            selectedTags.value = [];
             toast.add({
               severity: resp.severity,
               summary: resp.summary,
@@ -482,11 +514,12 @@ const savePermission = () => {
             toast.add({
               severity: resp.response.data.severity,
               summary: resp.response.data.summary,
-              detail: resp.response.data.detail + " " + resp.response.data.name,
+              detail: resp.response.data.detail,
               life: 3000,
             });
             if (resp.response.data.errors) {
               errors.value = resp.response.data.errors;
+              console.error(errors.value);
             }
           }
         })
@@ -504,6 +537,9 @@ const savePermission = () => {
 };
 const editPermission = (prod: DatumPermission) => {
   permission.value = { ...prod };
+  permission.value.tags.forEach((tag) => {
+    selectedTags.value.push(tag);
+  });
   permissionDialog.value = true;
   submitted.value = false;
   errors.value = null;
@@ -527,6 +563,7 @@ const deletePermission = () => {
             description: "",
             tags: [],
           };
+          selectedTags.value = [];
           deletePermissionDialog.value = false;
           toast.add({
             severity: resp.severity,
@@ -538,9 +575,10 @@ const deletePermission = () => {
           toast.add({
             severity: resp.response.data.severity,
             summary: resp.response.data.summary,
-            detail: resp.response.data.detail + ", " + resp.response.data.name,
+            detail: resp.response.data.detail,
             life: 3000,
           });
+          console.error(resp.response.data.errors);
         }
       })
       .catch((error: string) => {
@@ -601,9 +639,10 @@ const deleteSelectedPermissions = () => {
         toast.add({
           severity: resp.response.data.severity,
           summary: resp.response.data.summary,
-          detail: resp.response.data.detail + " " + resp.response.data.name,
+          detail: resp.response.data.detail,
           life: 3000,
         });
+        console.error(resp.response.data.errors);
       }
     })
     .catch((error: string) => {
@@ -616,9 +655,9 @@ const deleteSelectedPermissions = () => {
       console.error(error);
     });
 };
-//
 onBeforeMount(() => {
   getAllPermissions();
+  getAllTags();
 });
 </script>
 

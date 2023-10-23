@@ -55,12 +55,6 @@ const router = createRouter({
                         import("@src/views/pages/dashboard/Dashboard.vue"),
                 },
                 {
-                    path: "/dashboard/hello",
-                    name: "Hello",
-                    component: () =>
-                        import("@src/views/pages/dashboard/Hello.vue"),
-                },
-                {
                     path: "/dashboard/users",
                     name: "Users",
                     component: () =>

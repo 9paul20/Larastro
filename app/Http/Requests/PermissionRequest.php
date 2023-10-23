@@ -28,7 +28,8 @@ class PermissionRequest extends FormRequest
             'name' => 'required|string|min:4|max:255|unique:permissions,name,' . $id . ',id',
             'description' => 'nullable|string|min:4|max:255',
             'tags' => 'nullable|array|min:0|max:255',
-            'tags.*' => 'nullable|string|distinct|min:4|max:255',
+            'tags.*.id' => 'required|integer|exists:tags,id',
+            'tags.*.name' => 'required|string|min:3|max:255',
         ];
     }
 
@@ -44,12 +45,15 @@ class PermissionRequest extends FormRequest
             'description.min' => 'Please Provide Your Description With Minimum 4 Characters, Thank You.',
             'description.max' => 'Please Provide Your Description With Maximum 255 Characters, Thank You.',
             'tags.array' => 'Please Provide Your Tags As Array, Thank You.',
-            'tags.min' => 'Please Provide Your Tags With Minimum 0 Tag, Thank You.',
-            'tags.max' => 'Please Provide Your Tags With Maximum 255 Tags, Thank You.',
-            'tags.*.string' => 'Please Provide Your Tags As String, Thank You.',
-            'tags.*.distinct' => 'Please Provide Your Tags Without Duplicates, Thank You.',
-            'tags.*.min' => 'Please Provide Your Tags With Minimum 4 Characters, Thank You.',
-            'tags.*.max' => 'Please Provide Your Tags With Maximum 255 Characters, Thank You.',
+            'tags.min' => 'Please provide at least one tag, Thank You.',
+            'tags.max' => 'Please Provide Your Description With Maximum 255 Tags, Thank You.',
+            'tags.*.id.required' => 'Each tag must have an ID',
+            'tags.*.id.integer' => 'The tag ID must be an integer.',
+            'tags.*.id.exists' => 'The tag ID is not valid.',
+            'tags.*.name.required' => 'Each tag must have a name.',
+            'tags.*.name.string' => 'The tag name must be a string.',
+            'tags.*.name.min' => 'The tag name must be at least 3 characters.',
+            'tags.*.name.max' => 'The tag name must not exceed 255 characters.',
         ];
     }
 

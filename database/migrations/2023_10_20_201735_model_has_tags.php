@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Índices y claves foráneas
-            $table->unique(['tag_id', 'model_type', 'model_id']);
+            $table->primary(['tag_id', 'model_type', 'model_id']);
             $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
         });
     }

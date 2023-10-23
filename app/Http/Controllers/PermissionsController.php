@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PermissionRequest;
+use App\Models\CustomPermission;
+use App\Models\CustomRole;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
 class PermissionsController extends Controller
 {
@@ -21,7 +21,10 @@ class PermissionsController extends Controller
 
         if (request()->wantsJson()) {
             try {
-                $rowDatas = Permission::orderBy('id', 'asc')
+                $rowDatas = CustomPermission::orderBy('id', 'asc')
+                    ->with(
+                        'tags:id,name'
+                    )
                     ->paginate(
                         $perPage,
                         [
@@ -29,14 +32,9 @@ class PermissionsController extends Controller
                             "name",
                             "guard_name",
                             "description",
-                            "tags",
                         ],
                         "permissions_page"
                     );
-                $rowDatas->transform(function ($permission) {
-                    $permission->tags = $permission->tags === "" ? [] : explode(', ', $permission->tags);
-                    return $permission;
-                });
 
                 return response()->json($rowDatas, 200);
             } catch (\Throwable $th) {
@@ -59,12 +57,14 @@ class PermissionsController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                if ($request->has('tags') && is_array($request->tags)) {
-                    $tagsToString = implode(', ', $request->tags);
-                    $request->merge(['tags' => $tagsToString]);
-                    $permission = Permission::create($request->all());
+                $tags = $request->input('tags', []);
+                if ($tags && is_array($tags)) {
+                    $tagIds = collect($tags)->pluck('id')->toArray();
+                    unset($request['tags']);
+                    $permission = CustomPermission::create($request->all());
+                    $permission->tags()->attach($tagIds);
                 } else {
-                    $role = Permission::create($request->all());
+                    $permission = CustomPermission::create($request->all());
                 }
 
                 return response()->json([
@@ -92,18 +92,13 @@ class PermissionsController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                if ($request->has('tags')) {
-                    $tagsToString = implode(', ', $request->tags);
-                    $request->merge(['tags' => $tagsToString]);
-                    $permission = Permission::findOrFail($id);
-                    $permission->updateOrFail($request->all());
-                    $permission->save();
-                } elseif (empty($request->tags)) {
-                    $request->merge(['tags' => null]);
-                    $permission = Permission::findOrFail($id);
-                    $permission->updateOrFail($request->all());
-                    $permission->save();
-                }
+                $tags = $request->input('tags', []);
+                $tagIds = collect($tags)->pluck('id')->toArray();
+                unset($request['tags']);
+                $permission = CustomPermission::findOrFail($id);
+                $permission->updateOrFail($request->all());
+                $permission->save();
+                $permission->tags()->sync($tagIds);
 
                 return response()->json([
                     "severity" => "info",
@@ -130,7 +125,7 @@ class PermissionsController extends Controller
     {
         if (request()->wantsJson()) {
             try {
-                $permission = Permission::findOrFail($id);
+                $permission = CustomPermission::findOrFail($id);
 
                 if (auth()->check()) {
                     $user = auth()->user();
@@ -155,7 +150,7 @@ class PermissionsController extends Controller
                     }
                 }
 
-                $rolesWithPermission = Role::whereHas('permissions', function ($query) use ($id) {
+                $rolesWithPermission = CustomRole::whereHas('permissions', function ($query) use ($id) {
                     $query->where('id', $id);
                 })->count();
                 $usersWithPermission = User::whereHas('permissions', function ($query) use ($id) {
@@ -170,6 +165,7 @@ class PermissionsController extends Controller
                     ], 422);
                 }
 
+                $permission->tags()->detach();
                 $permission->deleteOrFail();
 
                 return response()->json([
@@ -195,6 +191,45 @@ class PermissionsController extends Controller
         if (request()->wantsJson()) {
             $permissionsID = $request->all();
             $permissionsCount = count($permissionsID);
+            if (auth()->check()) {
+                $user = auth()->user();
+                $permissionsInUse = $user->permissions()->whereIn('id', $permissionsID)->exists();
+                if ($permissionsInUse) {
+                    return response()->json([
+                        'severity' => 'error',
+                        'summary' => 'Error',
+                        'detail' => 'One or more permissions are in use by the authenticated user.'
+                    ], 400);
+                }
+
+                $rolesWithPermissions = $user->roles()->whereHas('permissions', function ($query) use ($permissionsID) {
+                    $query->whereIn('id', $permissionsID);
+                })->exists();
+                if ($rolesWithPermissions) {
+                    return response()->json([
+                        'severity' => 'error',
+                        'summary' => 'Error',
+                        'detail' => 'One or more permissions are associated with roles of the authenticated user.'
+                    ], 400);
+                }
+            }
+
+            $rolesWithPermission = CustomRole::whereHas('permissions', function ($query) use ($permissionsID) {
+                $query->whereIn('id', $permissionsID);
+            })->exists();
+
+            $usersWithPermissions = User::whereHas('permissions', function ($query) use ($permissionsID) {
+                $query->whereIn('id', $permissionsID);
+            })->exists();
+
+            if ($rolesWithPermission || $usersWithPermissions) {
+                return response()->json([
+                    "severity" => "error",
+                    "summary" => "Error",
+                    "detail" => "This permissions is in use and cannot be deleted.",
+                    "errors" => "Permissions In Use"
+                ], 422);
+            }
 
             if (!$permissionsID) {
                 return response()->json([
@@ -203,8 +238,15 @@ class PermissionsController extends Controller
                     'detail' => 'List of permissions is null o undefined.'
                 ], 400);
             }
+
             try {
-                Permission::whereIn('id', $permissionsID)->delete();
+                $permissionIDs = CustomPermission::whereIn('id', $permissionsID)->pluck('id')->toArray();
+                CustomPermission::whereIn('id', $permissionsID)->delete();
+                DB::table('model_has_tags')
+                    ->whereIn('model_id', $permissionIDs)
+                    ->where('model_type', CustomPermission::class)
+                    ->delete();
+
                 return response()->json([
                     "severity" => "warn",
                     "summary" => "Warning",

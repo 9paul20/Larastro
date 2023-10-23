@@ -8,5 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Tag extends Model
 {
     use HasFactory;
-    protected  $guarded = [];
+
+    protected $guarded = [];
+
+    protected $fillable = ['id', 'name', 'description'];
+
+    public function taggable()
+    {
+        return $this->morphTo();
+    }
 }

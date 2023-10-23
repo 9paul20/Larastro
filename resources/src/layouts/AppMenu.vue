@@ -22,11 +22,6 @@ const model = ref([
     items: [
       { label: "Dashboard", icon: "pi pi-fw pi-home", to: "/dashboard" },
       {
-        label: "Hello",
-        icon: "pi pi-fw pi-home",
-        to: "/dashboard/hello",
-      },
-      {
         label: "Users",
         icon: "pi pi-fw pi-home",
         to: "/dashboard/users",

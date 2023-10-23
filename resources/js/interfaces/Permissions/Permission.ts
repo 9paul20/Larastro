@@ -16,14 +16,30 @@ export interface Permission {
 
 export interface DatumPermission {
     description: string;
-    guard_name: string;
+    guard_name: GuardNamePermission;
     id: number;
     name: string;
-    tags: string[];
+    tags: TagPermission[];
 }
 
 export enum GuardNamePermission {
     Web = "web",
+}
+
+export interface TagPermission {
+    id: number;
+    name: string;
+    pivot: PivotPermission;
+}
+
+export interface PivotPermission {
+    model_id: number;
+    model_type: ModelTypePermission;
+    tag_id: number;
+}
+
+export enum ModelTypePermission {
+    AppModelsCustomPermission = "App\\Models\\CustomPermission",
 }
 
 export interface LinkPermission {

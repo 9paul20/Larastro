@@ -20,7 +20,7 @@ export interface DatumRole {
     id: number;
     name: string;
     permissions: PermissionRole[];
-    tags: string[];
+    tags: TagRole[];
 }
 
 export enum GuardNameRole {
@@ -28,17 +28,26 @@ export enum GuardNameRole {
 }
 
 export interface PermissionRole {
-    description: string;
-    guard_name: GuardNameRole;
     id: number;
     name: string;
-    pivot: PivotRole;
-    tags: string;
+    pivot: PermissionPivotRole;
 }
 
-export interface PivotRole {
+export interface PermissionPivotRole {
     permission_id: number;
     role_id: number;
+}
+
+export interface TagRole {
+    id: number;
+    name: string;
+    pivot: TagPivotRole;
+}
+
+export interface TagPivotRole {
+    model_id: number;
+    model_type: string;
+    tag_id: number;
 }
 
 export interface LinkRole {

@@ -422,7 +422,7 @@ const user = ref<DatumUser>();
 const users = ref<DatumUser[]>([]);
 const roles = ref<RoleUser[]>([]);
 const permissions = ref<PermissionUser[]>([]);
-const catalogPermissions = ref<string[]>(["User", "Role", "Permission"]);
+const catalogPermissions = ref<string[]>(["User", "Tag", "Role", "Permission"]);
 const categorizedPermissions = ref<Record<string, string[]>>({});
 const switchPermissions = ref<Record<string, boolean>>({});
 catalogPermissions.value.forEach((catalogPermission) => {
@@ -518,7 +518,6 @@ const getAllRoles = () => {
       if (resp.data) {
         roles.value = resp.data;
         loading.value = false;
-        // console.log("ROLES SON:", roles.value);
       }
     })
     .catch((error: string) => {
@@ -541,7 +540,7 @@ const getAllPermissions = () => {
         permissions.value.forEach((permission) => {
           permission.tags.forEach((tag) => {
             catalogPermissions.value.forEach((catalogPermission) => {
-              if (tag === catalogPermission) {
+              if (tag.name === catalogPermission) {
                 categorizedPermissions.value[catalogPermission + "sPermissions"].push(
                   permission.name
                 );
@@ -591,7 +590,6 @@ const saveUser = () => {
         store
           .storeUser(user.value)
           .then((respStore: any) => {
-            //console.log(resp);
             if (respStore && respStore.severity === "success") {
               store
                 .getCurrentUserId()
@@ -637,12 +635,12 @@ const saveUser = () => {
               toast.add({
                 severity: respStore.response.data.severity,
                 summary: respStore.response.data.summary,
-                detail:
-                  respStore.response.data.detail + " " + respStore.response.data.name,
+                detail: respStore.response.data.detail,
                 life: 3000,
               });
               if (respStore.response.data.errors) {
                 errors.value = respStore.response.data.errors;
+                console.error(errors.value);
               }
             }
           })
@@ -689,11 +687,12 @@ const saveUser = () => {
             toast.add({
               severity: resp.response.data.severity,
               summary: resp.response.data.summary,
-              detail: resp.response.data.detail + " " + resp.response.data.name,
+              detail: resp.response.data.detail,
               life: 3000,
             });
             if (resp.response.data.errors) {
               errors.value = resp.response.data.errors;
+              console.error(errors.value);
             }
           }
         })
@@ -752,9 +751,10 @@ const deleteUser = () => {
           toast.add({
             severity: resp.response.data.severity,
             summary: resp.response.data.summary,
-            detail: resp.response.data.detail + ", " + resp.response.data.name,
+            detail: resp.response.data.detail,
             life: 3000,
           });
+          console.error(errors.value);
         }
       })
       .catch((error: string) => {

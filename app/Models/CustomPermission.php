@@ -8,4 +8,11 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 class CustomPermission extends SpatiePermission
 {
     use HasFactory;
+
+    protected $guarded = [];
+
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'model', 'model_has_tags', 'model_id', 'tag_id');
+    }
 }
