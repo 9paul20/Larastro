@@ -234,9 +234,11 @@
       </div>
       <div class="field">
         <label for="description">Description</label>
-        <InputText
+        <Textarea
           id="description"
           v-model.trim="role.description"
+          rows="5"
+          autoResize
           required="false"
           type="text"
           placeholder="Write a description"

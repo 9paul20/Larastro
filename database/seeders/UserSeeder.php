@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
         ])->assignRole('Admin');
-        $UAdmin->syncPermissions(['Create Users', 'Read Users', 'Update Users', 'Delete Users', 'Create Roles', 'Read Roles', 'Update Roles', 'Delete Roles', 'Create Permissions', 'Read Permissions', 'Update Permissions', 'Delete Permissions']);
+        $UAdmin->syncPermissions(['Create Users', 'Read Users', 'Update Users', 'Delete Users', 'Create Tags', 'Read Tags', 'Update Tags', 'Delete Tags', 'Create Roles', 'Read Roles', 'Update Roles', 'Delete Roles', 'Create Permissions', 'Read Permissions', 'Update Permissions', 'Delete Permissions']);
 
         $USeeder = User::factory(10)
             ->create()

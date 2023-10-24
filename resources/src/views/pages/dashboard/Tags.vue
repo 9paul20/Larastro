@@ -168,9 +168,11 @@
         </div>
         <div class="field col-12 mb-2">
           <label for="description">Description</label>
-          <InputText
+          <Textarea
             id="description"
             v-model.trim="tag.description"
+            rows="5"
+            autoResize
             required="false"
             type="text"
             placeholder="Write a description"
