@@ -220,116 +220,50 @@
           </div>
         </div>
       </div>
-      <div class="field d-flex align-items-center">
-        <label for="tags" class="flex-shrink-0">Tags</label>
-        <MultiSelect
-          id="tags"
-          v-model.trim="selectedTags"
-          :options="tags"
-          required="false"
-          filter
-          optionLabel="name"
-          placeholder="Select Tags"
-          :maxSelectedLabels="4"
-          :class="{
-            'p-invalid': errors?.tags,
-          }"
-          @blur="hideErrors('tags')"
-        />
-        <Button icon="pi pi-plus" class="p-button-rounded p-button-text p-ml-2" />
-        <div v-for="(error, key) in errors" :key="key">
-          <div v-if="typeof key === 'string' && key.startsWith('tags')">
-            <span v-for="(errorMsg, index) in error" :key="index">
-              <small class="p-error">{{ errorMsg }}</small>
-            </span>
-          </div>
-          <div v-else>
-            <small class="p-error"></small>
-          </div>
-        </div>
-      </div>
-      <!-- <div class="flex align-items-center mb-5">
-        <div
-          class="h-2rem w-2rem sm:h-3rem sm:w-3rem border-1 border-300 text-900 inline-flex justify-content-center align-items-center flex-shrink-0 border-round mr-3 cursor-pointer hover:surface-100 transition-duration-150 transition-colors"
-        >
-          XS
-        </div>
-      </div> -->
+
       <div
         class="flex flex-column sm:flex-row sm:align-items-center sm:justify-content-between"
       >
-        <span
-          class="p-inputnumber p-component p-inputwrapper p-inputwrapper-filled p-inputnumber-buttons-horizontal w-8rem"
-          data-pc-name="inputnumber"
-          data-pc-section="root"
-          spinnermode="horizontal"
-          ><input
-            class="p-inputtext p-component p-inputnumber-input w-3rem text-center"
-            data-pc-name="inputtext"
-            data-pc-section="input"
-            role="spinbutton"
-            aria-valuemin="0"
-            aria-valuenow="1" /><!----><button
-            class="p-button p-component p-button-icon-only p-inputnumber-button p-inputnumber-button-up p-button-text"
-            type="button"
-            data-pc-name="button"
-            data-pc-section="incrementbutton"
-            tabindex="-1"
-            aria-hidden="true"
-            data-pd-ripple="true"
-          >
-            <span class="pi pi-plus"></span
-            ><span class="p-button-label" data-pc-section="label">&nbsp;</span
-            ><!----><span
-              role="presentation"
-              aria-hidden="true"
-              data-p-ink="true"
-              data-p-ink-active="false"
-              class="p-ink"
-              data-pc-name="ripple"
-              data-pc-section="root"
-            ></span></button
-          ><button
-            class="p-button p-component p-button-icon-only p-inputnumber-button p-inputnumber-button-down p-button-text"
-            type="button"
-            data-pc-name="button"
-            data-pc-section="decrementbutton"
-            tabindex="-1"
-            aria-hidden="true"
-            data-pd-ripple="true"
-          >
-            <span class="pi pi-minus"></span
-            ><span class="p-button-label" data-pc-section="label">&nbsp;</span
-            ><!----><span
-              role="presentation"
-              aria-hidden="true"
-              data-p-ink="true"
-              data-p-ink-active="false"
-              class="p-ink"
-              data-pc-name="ripple"
-              data-pc-section="root"
-            ></span></button
-        ></span>
-        <div class="flex align-items-center flex-1 mt-3 sm:mt-0 ml-0 sm:ml-5">
+        <div class="field d-flex align-items-center flex-1">
+          <label for="tags" class="flex-shrink-0">Tags</label>
+          <MultiSelect
+            id="tags"
+            v-model.trim="selectedTags"
+            :options="tags"
+            required="false"
+            filter
+            optionLabel="name"
+            placeholder="Select Tags"
+            :maxSelectedLabels="4"
+            :class="{
+              'p-invalid': errors?.tags,
+            }"
+            @blur="hideErrors('tags')"
+          />
+          <div v-for="(error, key) in errors" :key="key">
+            <div v-if="typeof key === 'string' && key.startsWith('tags')">
+              <span v-for="(errorMsg, index) in error" :key="index">
+                <small class="p-error">{{ errorMsg }}</small>
+              </span>
+            </div>
+            <div v-else>
+              <small class="p-error"></small>
+            </div>
+          </div>
+        </div>
+        <div class="flex align-items-center flex-3 mt-3 ml-2">
           <button
-            class="p-button p-component flex-1 mr-5"
+            class="p-button p-component"
             type="button"
-            aria-label="Add to Cart"
+            aria-label="Add Tag"
             data-pc-name="button"
             data-pc-section="root"
             data-pd-ripple="true"
+            style="font-size: 1.2rem; padding: 0.9rem 1rem"
+            @click="console.log('VAMOS A ABRIR EL DIALOGO DE TAGS')"
           >
-            <!----><span class="p-button-label" data-pc-section="label">Add to Cart</span
-            ><!----><span
-              role="presentation"
-              aria-hidden="true"
-              data-p-ink="true"
-              data-p-ink-active="false"
-              class="p-ink"
-              data-pc-name="ripple"
-              data-pc-section="root"
-            ></span></button
-          ><i class="pi text-2xl cursor-pointer pi-heart text-600"></i>
+            <span class="p-button-icon p-c pi pi-plus"></span>
+          </button>
         </div>
       </div>
       <template #footer>
