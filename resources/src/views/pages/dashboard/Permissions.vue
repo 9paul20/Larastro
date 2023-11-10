@@ -260,7 +260,7 @@
             data-pc-section="root"
             data-pd-ripple="true"
             style="font-size: 1.2rem; padding: 0.9rem 1rem"
-            @click="console.log('VAMOS A ABRIR EL DIALOGO DE TAGS')"
+            @click="openNewTag"
           >
             <span class="p-button-icon p-c pi pi-plus"></span>
           </button>
@@ -271,6 +271,8 @@
         <Button label="Save" icon="pi pi-check" text @click="savePermission" />
       </template>
     </Dialog>
+
+    <addTagDialog :tagDialog="tagDialog" @closeDialog="handleDialogClose" />
 
     <!-- Dialog Delete Permission -->
     <Dialog
@@ -340,6 +342,7 @@ import { FilterMatchMode } from "primevue/api";
 import { DatumPermission, TagPermission } from "@js/interfaces/Permissions/Permission";
 import { DatumTag } from "@js/interfaces/Tags/Tag";
 import { PermissionLastID } from "@js/interfaces/index";
+import addTagDialog from "@src/components/addTagDialog.vue";
 //
 const toast = useToast();
 const store = permissionsStore();
@@ -351,6 +354,7 @@ const tags = ref<DatumTag[]>([]);
 const selectedTags = ref<[]>([]);
 const loading = ref<boolean>();
 const permissionDialog = ref<boolean>(false);
+const tagDialog = ref<boolean>(false);
 const deletePermissionDialog = ref<boolean>(false);
 const deletePermissionsDialog = ref<boolean>(false);
 const lastID = ref<PermissionLastID>();
@@ -379,6 +383,19 @@ const openNew = () => {
   submitted.value = false;
   permissionDialog.value = true;
   errors.value = null;
+};
+const openNewTag = () => {
+  permissionDialog.value = false;
+  tagDialog.value = true;
+  // console.log("VAMOS A ABRIR EL DIALOG DE CREAR TAG");
+  // console.log(tagDialog.value);
+};
+// const updatePermissionDialog = (value) => {
+//   permissionDialog.value = value;
+// };
+const handleDialogClose = (value) => {
+  tagDialog.value = !value;
+  permissionDialog.value = value; // También actualizamos el estado de permissionDialog
 };
 const hideDialog = () => {
   permissionDialog.value = false;
