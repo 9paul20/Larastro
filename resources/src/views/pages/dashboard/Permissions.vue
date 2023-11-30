@@ -272,7 +272,11 @@
       </template>
     </Dialog>
 
-    <addTagDialog :tagDialog="tagDialog" @closeDialog="handleDialogClose" />
+    <addTagDialog
+      :tagDialog="tagDialog"
+      @closeDialog="handleDialogClose"
+      @updateListTags="updateListTags"
+    />
 
     <!-- Dialog Delete Permission -->
     <Dialog
@@ -387,15 +391,13 @@ const openNew = () => {
 const openNewTag = () => {
   permissionDialog.value = false;
   tagDialog.value = true;
-  // console.log("VAMOS A ABRIR EL DIALOG DE CREAR TAG");
-  // console.log(tagDialog.value);
 };
-// const updatePermissionDialog = (value) => {
-//   permissionDialog.value = value;
-// };
 const handleDialogClose = (value) => {
   tagDialog.value = !value;
   permissionDialog.value = value; // También actualizamos el estado de permissionDialog
+};
+const updateListTags = (value) => {
+  if (value) getAllTags();
 };
 const hideDialog = () => {
   permissionDialog.value = false;

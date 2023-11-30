@@ -256,31 +256,49 @@
           </div>
         </div>
       </div>
-      <div class="field">
-        <label for="tags">Tags</label>
-        <MultiSelect
-          id="tags"
-          v-model.trim="selectedTags"
-          :options="tags"
-          required="false"
-          filter
-          optionLabel="name"
-          placeholder="Select Tags"
-          :maxSelectedLabels="4"
-          :class="{
-            'p-invalid': errors?.tags,
-          }"
-          @blur="hideErrors('tags')"
-        />
-        <div v-for="(error, key) in errors" :key="key">
-          <div v-if="typeof key === 'string' && key.startsWith('tags')">
-            <span v-for="(errorMsg, index) in error" :key="index">
-              <small class="p-error">{{ errorMsg }}</small>
-            </span>
+      <div
+        class="flex flex-column sm:flex-row sm:align-items-center sm:justify-content-between"
+      >
+        <div class="field d-flex align-items-center flex-1">
+          <label for="tags">Tags</label>
+          <MultiSelect
+            id="tags"
+            v-model.trim="selectedTags"
+            :options="tags"
+            required="false"
+            filter
+            optionLabel="name"
+            placeholder="Select Tags"
+            :maxSelectedLabels="4"
+            :class="{
+              'p-invalid': errors?.tags,
+            }"
+            @blur="hideErrors('tags')"
+          />
+          <div v-for="(error, key) in errors" :key="key">
+            <div v-if="typeof key === 'string' && key.startsWith('tags')">
+              <span v-for="(errorMsg, index) in error" :key="index">
+                <small class="p-error">{{ errorMsg }}</small>
+              </span>
+            </div>
+            <div v-else>
+              <small class="p-error"></small>
+            </div>
           </div>
-          <div v-else>
-            <small class="p-error"></small>
-          </div>
+        </div>
+        <div class="flex align-items-center flex-3 mt-3 ml-2">
+          <button
+            class="p-button p-component"
+            type="button"
+            aria-label="Add Tag"
+            data-pc-name="button"
+            data-pc-section="root"
+            data-pd-ripple="true"
+            style="font-size: 1.2rem; padding: 0.9rem 1rem"
+            @click="openNewTag"
+          >
+            <span class="p-button-icon p-c pi pi-plus"></span>
+          </button>
         </div>
       </div>
       <h5>Permissions</h5>
@@ -322,6 +340,12 @@
         <Button label="Save" icon="pi pi-check" text @click="saveRole" />
       </template>
     </Dialog>
+
+    <addTagDialog
+      :tagDialog="tagDialog"
+      @closeDialog="handleDialogClose"
+      @updateListTags="updateListTags"
+    />
 
     <!-- Dialog Delete Role -->
     <Dialog
@@ -381,6 +405,7 @@ import { DatumRole, PermissionRole, TagRole } from "@js/interfaces/Roles/Role";
 import { DatumTag } from "@js/interfaces/Tags/Tag";
 import { DatumPermission } from "@js/interfaces/Permissions/Permission";
 import { RoleLastID } from "@js/interfaces/index";
+import addTagDialog from "@src/components/addTagDialog.vue";
 //
 const toast = useToast();
 const store = rolesStore();
@@ -390,7 +415,6 @@ const dt = ref<any>();
 const role = ref<DatumRole>();
 const roles = ref<DatumRole[]>([]);
 const tags = ref<DatumTag[]>([]);
-const permission = ref<DatumPermission>();
 const selectedTags = ref<[]>([]);
 const permissions = ref<PermissionRole[]>([]);
 const catalogPermissions = ref<string[]>(["User", "Tag", "Role", "Permission"]);
@@ -403,6 +427,7 @@ catalogPermissions.value.forEach((catalogPermission) => {
 const checkboxPermissions = ref<string[]>([]);
 const loading = ref<boolean>();
 const roleDialog = ref<boolean>(false);
+const tagDialog = ref<boolean>(false);
 const deleteRoleDialog = ref<boolean>(false);
 const deleteRolesDialog = ref<boolean>(false);
 const lastID = ref<RoleLastID>();
@@ -438,6 +463,17 @@ const openNew = () => {
   submitted.value = false;
   roleDialog.value = true;
   errors.value = null;
+};
+const openNewTag = () => {
+  roleDialog.value = false;
+  tagDialog.value = true;
+};
+const handleDialogClose = (value) => {
+  tagDialog.value = !value;
+  roleDialog.value = value; // También actualizamos el estado de permissionDialog
+};
+const updateListTags = (value) => {
+  if (value) getAllTags();
 };
 const hideDialog = () => {
   roleDialog.value = false;

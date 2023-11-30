@@ -11,9 +11,10 @@
     >
       <!-- <Fieldset legend="Tag Information"> -->
       <div class="grid formgrid">
-        <!-- <div class="field col-12 mb-2">
+        <div class="field col-12 mb-2">
           <label for="name">Name</label>
           <InputText
+            v-if="tag"
             id="name"
             v-model.trim="tag.name"
             required="true"
@@ -31,10 +32,11 @@
               <small class="p-error">{{ errorName }}</small>
             </div>
           </div>
-        </div> -->
-        <!-- <div class="field col-12 mb-2">
+        </div>
+        <div class="field col-12 mb-2">
           <label for="description">Description</label>
           <Textarea
+            v-if="tag"
             id="description"
             v-model.trim="tag.description"
             rows="5"
@@ -55,7 +57,7 @@
               <small class="p-error">{{ errorDescription }}</small>
             </div>
           </div>
-        </div> -->
+        </div>
       </div>
       <!-- </Fieldset> -->
 
@@ -71,7 +73,6 @@
 import { ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
 import { tagsStore } from "@js/stores/Tags";
-import { DatumTag } from "@js/interfaces/Tags/Tag";
 //
 const props = defineProps({
   tagDialog: {
@@ -87,8 +88,14 @@ const dialogVisible = ref(props.tagDialog);
 //
 const toast = useToast();
 const storeTagsDialog = tagsStore();
-const tag = ref<DatumTag>();
-// const tagDialog = ref<boolean>(false);
+interface Tag {
+  name: string;
+  description: string;
+}
+const tag = ref<Tag>({
+  name: "",
+  description: "",
+});
 const errors = ref(null);
 const submitted = ref<boolean>(false);
 //
@@ -102,11 +109,9 @@ const hideTagDialog = () => {
   submitted.value = false;
   errors.value = null;
   tag.value = {
-    id: 0,
     name: "",
     description: "",
   };
-  // emits("permissionDialogChanged", true);
   emits("closeDialog", true);
 };
 const onHideDialog = () => {
@@ -123,11 +128,12 @@ const saveTag = () => {
       .then((respStore: any) => {
         if (respStore && respStore.severity === "success") {
           tag.value = {
-            id: 0,
             name: "",
             description: "",
           };
+          emits("updateListTags", true);
           dialogVisible.value = false;
+          emits("closeDialog", true);
           toast.add({
             severity: respStore.severity,
             summary: respStore.summary,
