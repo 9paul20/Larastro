@@ -27,7 +27,31 @@
           <i class="pi pi-user"></i>
           <span>Profile</span>
         </button>
-        <Menu ref="menu" :model="items" :popup="true" />
+        <Menu ref="menu" :model="items" :popup="true">
+          <template #item="{ item, props }">
+            <router-link
+              v-if="item.route"
+              v-slot="{ href, navigate }"
+              :to="item.route"
+              custom
+            >
+              <a v-ripple :href="href" v-bind="props.action" @click="navigate">
+                <span :class="item.icon" />
+                <span class="ml-2">{{ item.label }}</span>
+              </a>
+            </router-link>
+            <a
+              v-else
+              v-ripple
+              :href="item.url"
+              :target="item.target"
+              v-bind="props.action"
+            >
+              <span :class="item.icon" />
+              <span class="ml-2">{{ item.label }}</span>
+            </a>
+          </template>
+        </Menu>
       </div>
       <button class="p-link layout-topbar-button">
         <i class="pi pi-cog"></i>
@@ -107,7 +131,11 @@ const items = ref([
   { label: "Profile", icon: "pi pi-fw pi-user" },
   { label: "Settings", icon: "pi pi-fw pi-cog" },
   { separator: true },
-  { label: "Log Out", icon: "pi pi-sign-out", to: "/" },
+  {
+    label: "Log Out",
+    icon: "pi pi-sign-out",
+    route: "/",
+  },
   {
     label: "Change Theme",
     icon: "pi pi-sun",
